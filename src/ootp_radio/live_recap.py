@@ -33,6 +33,20 @@ def prepare_latest_recap(
     save_path = Path(save_dir)
     require_valid_save_dir(save_path)
     game_files = detect_latest_game(save_path)
+    return prepare_game_recap(
+        game_files,
+        poll_interval_seconds=poll_interval_seconds,
+        sleep=sleep,
+    )
+
+
+def prepare_game_recap(
+    game_files: GameFiles,
+    *,
+    poll_interval_seconds: float = 0.25,
+    sleep: Callable[[float], None] = time.sleep,
+) -> PreparedLiveRecap:
+    """Stabilize, parse, and format one already detected game."""
     ensure_game_files_stable(
         game_files,
         poll_interval_seconds=poll_interval_seconds,
@@ -46,4 +60,3 @@ def prepare_latest_recap(
         recap=recap,
         narration_text=narration_text,
     )
-

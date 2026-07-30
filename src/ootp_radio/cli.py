@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -18,6 +19,8 @@ from ootp_radio.narration import format_recap_narration
 from ootp_radio.paths import SaveDirectoryError, validate_save_dir
 from ootp_radio.recap_parser import RecapParseError, parse_recap_file
 from ootp_radio.speech import MacSaySpeaker, SpeechError
+from ootp_radio.state import StateError
+from ootp_radio.watcher import RecapWatcher
 
 
 def _print_recap(box_score: Path) -> int:
@@ -63,6 +66,13 @@ def _deliver_narration(
 
 def _positive_integer(value: str) -> int:
     parsed_value = int(value)
+    if parsed_value <= 0:
+        raise argparse.ArgumentTypeError("must be greater than zero")
+    return parsed_value
+
+
+def _positive_number(value: str) -> float:
+    parsed_value = float(value)
     if parsed_value <= 0:
         raise argparse.ArgumentTypeError("must be greater than zero")
     return parsed_value
@@ -136,6 +146,31 @@ def _recap_latest(
     )
 
 
+def _watch_latest(
+    save_dir: Path,
+    *,
+    state_file: Path,
+    poll_interval: float,
+    play_current: bool,
+    voice: str | None,
+    rate: int | None,
+) -> int:
+    config = load_config(save_dir=save_dir)
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    watcher = RecapWatcher(
+        save_dir=config.save_dir,
+        state_file=state_file,
+        speaker=MacSaySpeaker(voice=voice, rate=rate),
+        poll_interval_seconds=poll_interval,
+        play_current=play_current,
+    )
+    try:
+        watcher.run()
+    except KeyboardInterrupt:
+        print('INFO watcher_stopped reason="keyboard_interrupt"', file=sys.stderr)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the command-line parser."""
     parser = argparse.ArgumentParser(
@@ -199,6 +234,43 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_speech_arguments(recap_latest_parser)
 
+    watch_parser = subparsers.add_parser(
+        "watch",
+        help="watch for newly completed games and speak each recap once",
+    )
+    watch_parser.add_argument(
+        "--save-dir",
+        type=Path,
+        required=True,
+        help="path to the selected .lg saved-league directory",
+    )
+    watch_parser.add_argument(
+        "--state-file",
+        type=Path,
+        default=Path("var") / "state.json",
+        help="duplicate-prevention state path outside the OOTP save",
+    )
+    watch_parser.add_argument(
+        "--poll-interval",
+        type=_positive_number,
+        default=2.0,
+        help="seconds between checks (default: 2)",
+    )
+    watch_parser.add_argument(
+        "--play-current",
+        action="store_true",
+        help="speak the current latest game when the watcher starts",
+    )
+    watch_parser.add_argument(
+        "--voice",
+        help="override the voice configured in macOS",
+    )
+    watch_parser.add_argument(
+        "--rate",
+        type=_positive_integer,
+        help="override the configured speech rate in words per minute",
+    )
+
     return parser
 
 
@@ -232,11 +304,21 @@ def main(argv: Sequence[str] | None = None) -> int:
                 rate=args.rate,
                 dry_run=args.dry_run,
             )
+        if args.command == "watch":
+            return _watch_latest(
+                args.save_dir,
+                state_file=args.state_file,
+                poll_interval=args.poll_interval,
+                play_current=args.play_current,
+                voice=args.voice,
+                rate=args.rate,
+            )
     except (
         GameDetectionError,
         RecapParseError,
         SaveDirectoryError,
         SpeechError,
+        StateError,
     ) as error:
         print(f"error: {error}", file=sys.stderr)
         return 2

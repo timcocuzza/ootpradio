@@ -112,3 +112,13 @@ def test_recap_latest_sends_live_narration_to_speaker(tmp_path: Path) -> None:
         "This is WBAL News Radio. Your Baltimore Orioles postgame report."
     )
     assert "DJ Layton" in narration
+
+
+def test_watch_stops_cleanly_on_keyboard_interrupt(tmp_path: Path, capsys) -> None:
+    save_dir = tmp_path / "League.lg"
+
+    with patch("ootp_radio.cli.RecapWatcher.run", side_effect=KeyboardInterrupt):
+        result = main(["watch", "--save-dir", str(save_dir)])
+
+    assert result == 0
+    assert "watcher_stopped" in capsys.readouterr().err
