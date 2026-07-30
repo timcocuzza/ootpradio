@@ -131,6 +131,18 @@ def format_broadcast_score_chunks(
     )
 
 
+def format_off_day_score_chunks(
+    results: Sequence[GameResult],
+) -> tuple[str, ...]:
+    """Format every game on a slate where the controlled team was idle."""
+    if not results:
+        return ()
+    return (
+        "Around the league.",
+        *(format_score_sentence(result) for result in results),
+    )
+
+
 def format_news_headline_chunks(preview: NewsPreview) -> tuple[str, ...]:
     """Format only selected headlines; message bodies are never narrated."""
     if not preview.selected:

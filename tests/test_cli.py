@@ -9,11 +9,15 @@ from ootp_radio.models import (
     BroadcastPlan,
     BroadcastSection,
     BroadcastSegment,
+    GameDayEvent,
     GameFiles,
     GameHighlights,
     GameResult,
+    LeagueSlate,
     NewsMessage,
     NewsPreview,
+    OffDayBroadcastPlan,
+    OffDayEvent,
     SelectedNewsMessage,
 )
 
@@ -388,8 +392,34 @@ def test_broadcast_preview_prints_effective_order_sections_and_omissions(
             ),
         ),
     )
+    game_files = GameFiles(
+        1596,
+        save_dir / "replays" / "replay_1596.rpl",
+        save_dir / "news" / "html" / "box_scores" / "game_box_1596.html",
+        None,
+        None,
+    )
+    slate = LeagueSlate(
+        "08/01/2032",
+        (
+            GameResult(
+                1596,
+                "08/01/2032",
+                "Baltimore Orioles",
+                7,
+                "Detroit Tigers",
+                4,
+                3,
+                10,
+            ),
+        ),
+        1,
+    )
 
-    with patch("ootp_radio.cli.detect_latest_game"):
+    with patch(
+        "ootp_radio.cli.detect_latest_radio_event",
+        return_value=GameDayEvent(game_files, slate),
+    ):
         with patch(
             "ootp_radio.cli.prepare_game_broadcast", return_value=plan
         ):
@@ -415,6 +445,68 @@ def test_broadcast_preview_prints_effective_order_sections_and_omissions(
     assert output.index("[highlights]") < output.index("[team-recap]")
     assert "The pitch...\n\nThe runner scores." in output
     assert "Skipped [news]" in output
+
+
+def test_broadcast_preview_prints_off_day_scores_without_team_segments(
+    tmp_path: Path, capsys
+) -> None:
+    save_dir = _create_live_recap_save(tmp_path)
+    slate = LeagueSlate(
+        "08/04/2032",
+        (GameResult(50, "08/04/2032", "Seattle", 5, "Texas", 3),),
+        1,
+    )
+    plan = OffDayBroadcastPlan(
+        date="08/04/2032",
+        requested_order=(
+            BroadcastSegment.HIGHLIGHTS,
+            BroadcastSegment.SCORES,
+        ),
+        effective_order=(
+            BroadcastSegment.HIGHLIGHTS,
+            BroadcastSegment.SCORES,
+        ),
+        sections=(
+            BroadcastSection(
+                BroadcastSegment.SCORES,
+                ("Around the league.", "The Seattle defeated the Texas, 5 to 3."),
+            ),
+        ),
+        issues=(
+            BroadcastIssue(
+                BroadcastSegment.HIGHLIGHTS,
+                "Baltimore Orioles did not play on 08/04/2032",
+            ),
+        ),
+    )
+
+    with patch(
+        "ootp_radio.cli.detect_latest_radio_event",
+        return_value=OffDayEvent(slate),
+    ):
+        with patch(
+            "ootp_radio.cli.prepare_off_day_broadcast",
+            return_value=plan,
+        ):
+            result = main(
+                [
+                    "broadcast-preview",
+                    "--save-dir",
+                    str(save_dir),
+                    "--team-name",
+                    "Baltimore Orioles",
+                    "--segment",
+                    "highlights",
+                    "--segment",
+                    "scores",
+                ]
+            )
+
+    output = capsys.readouterr().out
+    assert result == 0
+    assert output.startswith("Off day for Baltimore Orioles on 08/04/2032")
+    assert "Skipped [highlights]" in output
+    assert "[scores]" in output
 
 
 def test_watch_broadcast_builds_latest_wins_controller_and_stops_cleanly(

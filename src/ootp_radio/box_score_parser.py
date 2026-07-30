@@ -10,7 +10,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from stat import S_ISREG
 
-from ootp_radio.models import GameFiles, GameResult
+from ootp_radio.models import GameFiles, GameResult, LeagueSlate
 
 _GAME_BOX_FILENAME = re.compile(r"game_box_(\d+)\.html")
 _MLB_TITLE = re.compile(
@@ -36,6 +36,10 @@ class NotMajorLeagueBoxScoreError(BoxScoreError):
 
 class ScoreSlateNotReadyError(BoxScoreError):
     """Raised when one or more same-slate box scores are still changing."""
+
+
+class NoMajorLeagueBoxScoresError(BoxScoreError):
+    """Raised when no completed MLB box score can anchor a league slate."""
 
 
 @dataclass
@@ -232,6 +236,111 @@ def _file_metadata(path: Path) -> tuple[int, int]:
     if not S_ISREG(path_stat.st_mode):
         raise BoxScoreError(f"Expected '{path}' to be a regular file.")
     return path_stat.st_size, path_stat.st_mtime_ns
+
+
+def _scan_box_scores(box_scores_dir: Path) -> dict[Path, tuple[int, int]]:
+    try:
+        entries = list(box_scores_dir.iterdir())
+    except FileNotFoundError as error:
+        raise BoxScoreError(
+            f"The box-scores directory does not exist: '{box_scores_dir}'."
+        ) from error
+    except OSError as error:
+        raise BoxScoreError(
+            f"Could not inspect the box-scores directory '{box_scores_dir}': "
+            f"{error}."
+        ) from error
+
+    return {
+        entry: _file_metadata(entry)
+        for entry in entries
+        if _GAME_BOX_FILENAME.fullmatch(entry.name) is not None
+    }
+
+
+def discover_latest_mlb_slate(
+    save_dir: Path | str,
+    *,
+    window_seconds: float = 5.0,
+    poll_interval_seconds: float = 0.5,
+    sleep: Callable[[float], None] = time.sleep,
+) -> LeagueSlate:
+    """Find the newest stable same-date MLB score batch without a replay.
+
+    Off days have no controlled-team replay to use as an anchor. The box-score
+    directory itself is therefore sampled twice. Any added, removed, or
+    changing file postpones recognition until the next watcher poll, avoiding
+    a partial slate that could incorrectly look like a team off day.
+    """
+    if window_seconds < 0:
+        raise ValueError("window_seconds cannot be negative")
+    if poll_interval_seconds < 0:
+        raise ValueError("poll_interval_seconds cannot be negative")
+
+    box_scores_dir = Path(save_dir) / "news" / "html" / "box_scores"
+    first_metadata = _scan_box_scores(box_scores_dir)
+    if not first_metadata:
+        raise NoMajorLeagueBoxScoresError(
+            "No game_box_<GAME_ID>.html files were found."
+        )
+
+    sleep(poll_interval_seconds)
+    second_metadata = _scan_box_scores(box_scores_dir)
+    if second_metadata != first_metadata:
+        raise ScoreSlateNotReadyError(
+            "The latest box-score batch is still being written by OOTP. "
+            "Try again in a moment."
+        )
+
+    def candidate_key(path: Path) -> tuple[int, int]:
+        filename_match = _GAME_BOX_FILENAME.fullmatch(path.name)
+        assert filename_match is not None
+        return second_metadata[path][1], int(filename_match.group(1))
+
+    ordered_paths = sorted(second_metadata, key=candidate_key, reverse=True)
+    anchor_result: GameResult | None = None
+    anchor_path: Path | None = None
+    for path in ordered_paths:
+        try:
+            anchor_result = parse_box_score_file(path)
+        except NotMajorLeagueBoxScoreError:
+            continue
+        anchor_path = path
+        break
+
+    if anchor_result is None or anchor_path is None:
+        raise NoMajorLeagueBoxScoresError(
+            "No completed Major League Baseball box scores were found."
+        )
+
+    anchor_mtime_ns = second_metadata[anchor_path][1]
+    window_ns = int(window_seconds * 1_000_000_000)
+    results_by_id: dict[int, GameResult] = {}
+    result_mtimes: list[int] = []
+    for path, (_, modified_time_ns) in second_metadata.items():
+        if abs(modified_time_ns - anchor_mtime_ns) > window_ns:
+            continue
+        try:
+            result = parse_box_score_file(path)
+        except NotMajorLeagueBoxScoreError:
+            continue
+        if result.date != anchor_result.date:
+            continue
+        results_by_id[result.game_id] = result
+        result_mtimes.append(modified_time_ns)
+
+    if not results_by_id or anchor_result.date is None:
+        raise NoMajorLeagueBoxScoresError(
+            "The latest MLB score slate did not contain a dated final result."
+        )
+
+    return LeagueSlate(
+        date=anchor_result.date,
+        results=tuple(
+            results_by_id[game_id] for game_id in sorted(results_by_id)
+        ),
+        modified_time_ns=max(result_mtimes),
+    )
 
 
 def discover_same_slate_results(

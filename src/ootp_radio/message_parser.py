@@ -161,14 +161,38 @@ def discover_recent_messages(
     sleep: Callable[[float], None] = time.sleep,
 ) -> list[NewsMessage]:
     """Find stable messages written near the played replay's timestamp."""
+    try:
+        replay_mtime_ns = game_files.replay_path.stat().st_mtime_ns
+    except OSError as error:
+        raise MessageError(
+            f"Could not inspect replay '{game_files.replay_path}': {error}."
+        ) from error
+    save_dir = game_files.replay_path.parent.parent
+    return discover_recent_messages_at(
+        save_dir,
+        anchor_mtime_ns=replay_mtime_ns,
+        window_seconds=window_seconds,
+        poll_interval_seconds=poll_interval_seconds,
+        sleep=sleep,
+    )
+
+
+def discover_recent_messages_at(
+    save_dir: Path | str,
+    *,
+    anchor_mtime_ns: int,
+    window_seconds: float = 30.0,
+    poll_interval_seconds: float = 0.25,
+    sleep: Callable[[float], None] = time.sleep,
+) -> list[NewsMessage]:
+    """Find stable messages near a replay or off-day slate timestamp."""
     if window_seconds < 0:
         raise ValueError("window_seconds cannot be negative")
     if poll_interval_seconds < 0:
         raise ValueError("poll_interval_seconds cannot be negative")
 
-    messages_dir = game_files.replay_path.parent.parent / "messages"
+    messages_dir = Path(save_dir) / "messages"
     try:
-        replay_mtime_ns = game_files.replay_path.stat().st_mtime_ns
         entries = list(messages_dir.iterdir())
     except FileNotFoundError as error:
         raise MessageError(
@@ -183,7 +207,7 @@ def discover_recent_messages(
         if _MESSAGE_FILENAME.fullmatch(entry.name) is None:
             continue
         metadata = _file_metadata(entry)
-        if abs(metadata[1] - replay_mtime_ns) <= window_ns:
+        if abs(metadata[1] - anchor_mtime_ns) <= window_ns:
             first_metadata[entry] = metadata
 
     sleep(poll_interval_seconds)
@@ -348,6 +372,45 @@ def build_news_preview(
         team_name
         for result in mlb_results
         for team_name in (result.away_team, result.home_team)
+    }
+    mlb_team_ids = {
+        team_id
+        for result in mlb_results
+        for team_id in (result.away_team_id, result.home_team_id)
+        if team_id is not None
+    }
+    mlb_game_ids = {result.game_id for result in mlb_results}
+    return filter_messages(
+        messages,
+        team_name=team_name,
+        mlb_team_names=mlb_team_names,
+        mlb_team_ids=mlb_team_ids,
+        mlb_game_ids=mlb_game_ids,
+    )
+
+
+def build_news_preview_at(
+    save_dir: Path | str,
+    *,
+    anchor_mtime_ns: int,
+    team_name: str,
+    mlb_results: Sequence[GameResult],
+    window_seconds: float = 30.0,
+    poll_interval_seconds: float = 0.25,
+    sleep: Callable[[float], None] = time.sleep,
+) -> NewsPreview:
+    """Build a filtered news preview without requiring a team replay."""
+    messages = discover_recent_messages_at(
+        save_dir,
+        anchor_mtime_ns=anchor_mtime_ns,
+        window_seconds=window_seconds,
+        poll_interval_seconds=poll_interval_seconds,
+        sleep=sleep,
+    )
+    mlb_team_names = {
+        result_team_name
+        for result in mlb_results
+        for result_team_name in (result.away_team, result.home_team)
     }
     mlb_team_ids = {
         team_id

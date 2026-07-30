@@ -42,6 +42,51 @@ class GameResult:
 
 
 @dataclass(frozen=True)
+class LeagueSlate:
+    """One stable batch of MLB final scores written for an OOTP date."""
+
+    date: str
+    results: tuple[GameResult, ...]
+    modified_time_ns: int
+
+    @property
+    def key(self) -> str:
+        """Return a date-level identity that cannot replay a partial update."""
+        return f"slate:{self.date}"
+
+
+@dataclass(frozen=True)
+class GameDayEvent:
+    """A controlled-team game whose replay and league slate are ready."""
+
+    game_files: GameFiles
+    slate: LeagueSlate
+
+    @property
+    def key(self) -> str:
+        return f"game:{self.game_files.game_id}"
+
+    @property
+    def modified_time_ns(self) -> int:
+        return self.slate.modified_time_ns
+
+
+@dataclass(frozen=True)
+class OffDayEvent:
+    """A stable MLB score slate that does not contain the controlled team."""
+
+    slate: LeagueSlate
+
+    @property
+    def key(self) -> str:
+        return f"off-day:{self.slate.date}"
+
+    @property
+    def modified_time_ns(self) -> int:
+        return self.slate.modified_time_ns
+
+
+@dataclass(frozen=True)
 class MessageReference:
     """One cleaned OOTP entity reference from a message."""
 
@@ -112,6 +157,17 @@ class BroadcastPlan:
     """Ordered sections and omissions for one game broadcast."""
 
     game_id: int
+    requested_order: tuple[BroadcastSegment, ...]
+    effective_order: tuple[BroadcastSegment, ...]
+    sections: tuple[BroadcastSection, ...]
+    issues: tuple[BroadcastIssue, ...]
+
+
+@dataclass(frozen=True)
+class OffDayBroadcastPlan:
+    """Ordered sections and omissions for one controlled-team off day."""
+
+    date: str
     requested_order: tuple[BroadcastSegment, ...]
     effective_order: tuple[BroadcastSegment, ...]
     sections: tuple[BroadcastSection, ...]

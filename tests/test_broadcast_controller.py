@@ -8,8 +8,13 @@ from ootp_radio.models import (
     BroadcastIssue,
     BroadcastSection,
     BroadcastSegment,
+    GameDayEvent,
     GameFiles,
+    GameResult,
+    LeagueSlate,
+    OffDayEvent,
 )
+from ootp_radio.radio_event import RadioEventNotReadyError
 
 
 def _game(game_id: int) -> GameFiles:
@@ -229,3 +234,123 @@ def test_repeated_poll_of_same_game_never_replays_it() -> None:
     assert controller.poll_once() is False
     assert controller.play_pending_once() is None
     assert speaker.spoken == ["game 1 first", "game 1 second"]
+
+
+def _slate(date: str, game_id: int = 50) -> LeagueSlate:
+    return LeagueSlate(
+        date,
+        (
+            GameResult(
+                game_id,
+                date,
+                "Seattle Mariners",
+                5,
+                "Texas Rangers",
+                3,
+                24,
+                28,
+            ),
+        ),
+        game_id * 1_000_000_000,
+    )
+
+
+def _event_parts(target):
+    if isinstance(target, OffDayEvent):
+        yield BroadcastSection(
+            BroadcastSegment.SCORES,
+            (f"off day {target.slate.date}",),
+        )
+    else:
+        yield from _parts(target)
+
+
+def _event_controller(*, speaker, event_detector, play_current=False):
+    return LatestWinsBroadcastController(
+        save_dir=Path("League.lg"),
+        team_name="Baltimore Orioles",
+        segments=(BroadcastSegment.SCORES,),
+        speaker=speaker,
+        play_current=play_current,
+        event_detector=event_detector,
+        part_factory=_event_parts,
+    )
+
+
+def test_start_can_baseline_off_day_without_playing_it() -> None:
+    speaker = FakeSpeaker()
+    event = OffDayEvent(_slate("08/04/2032"))
+    controller = _event_controller(
+        speaker=speaker,
+        event_detector=lambda: event,
+    )
+
+    controller.initialize()
+
+    assert controller.recognized_event_key == "off-day:08/04/2032"
+    assert controller.pending_event_key is None
+    assert controller.recognized_game_id is None
+    assert speaker.spoken == []
+
+
+def test_new_off_day_interrupts_game_audio_without_queuing() -> None:
+    speaker = FakeSpeaker()
+    game_event = GameDayEvent(_game(1), _slate("08/03/2032", 1))
+    off_day = OffDayEvent(_slate("08/04/2032", 2))
+    controller = _event_controller(
+        speaker=speaker,
+        event_detector=lambda: game_event,
+        play_current=True,
+    )
+    controller.initialize()
+    speaker.on_speak = lambda: controller.recognize_event(off_day)
+
+    assert controller.play_pending_once() is False
+    assert controller.pending_event_key == "off-day:08/04/2032"
+    assert speaker.stop_calls == 1
+
+    assert controller.play_pending_once() is True
+    assert speaker.spoken == ["game 1 first", "off day 08/04/2032"]
+
+
+def test_same_off_day_date_never_replays_when_slate_object_changes() -> None:
+    speaker = FakeSpeaker()
+    first = OffDayEvent(_slate("08/04/2032", 50))
+    updated = OffDayEvent(_slate("08/04/2032", 51))
+    events = iter((first, updated))
+    controller = _event_controller(
+        speaker=speaker,
+        event_detector=lambda: next(events),
+        play_current=True,
+    )
+    controller.initialize()
+    assert controller.play_pending_once() is True
+
+    assert controller.poll_once() is False
+    assert controller.play_pending_once() is None
+    assert speaker.spoken == ["off day 08/04/2032"]
+
+
+def test_not_ready_team_event_does_not_interrupt_current_audio() -> None:
+    speaker = FakeSpeaker()
+    off_day = OffDayEvent(_slate("08/04/2032", 50))
+    calls = 0
+
+    def detect_event():
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            return off_day
+        raise RadioEventNotReadyError("team replay is still settling")
+
+    controller = _event_controller(
+        speaker=speaker,
+        event_detector=detect_event,
+        play_current=True,
+    )
+    controller.initialize()
+    speaker.on_speak = controller.poll_once
+
+    assert controller.play_pending_once() is True
+    assert speaker.stop_calls == 0
+    assert speaker.spoken == ["off day 08/04/2032"]

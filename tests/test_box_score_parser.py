@@ -7,8 +7,10 @@ import pytest
 
 from ootp_radio.box_score_parser import (
     BoxScoreParseError,
+    NoMajorLeagueBoxScoresError,
     NotMajorLeagueBoxScoreError,
     ScoreSlateNotReadyError,
+    discover_latest_mlb_slate,
     discover_same_slate_results,
     parse_box_score_file,
     parse_box_score_html,
@@ -169,3 +171,69 @@ def test_changing_same_slate_box_score_reports_not_ready(tmp_path: Path) -> None
 
     with pytest.raises(ScoreSlateNotReadyError, match="still being written"):
         discover_same_slate_results(game_files, sleep=change_box_score)
+
+
+def test_discovers_latest_mlb_slate_without_a_team_replay(tmp_path: Path) -> None:
+    save_dir, game_files, anchor_ns = _create_slate(tmp_path)
+    box_scores_dir = game_files.box_score_path.parent
+    games = {
+        305: (_box_html(game_id=305), anchor_ns + 1_000_000_000),
+        999: (
+            _box_html(game_id=999, date="08/02/2032"),
+            anchor_ns + 10_000_000_000,
+        ),
+        1001: (
+            _box_html(game_id=1001, date="08/02/2032"),
+            anchor_ns + 11_000_000_000,
+        ),
+    }
+    for game_id, (document, modified_time_ns) in games.items():
+        path = box_scores_dir / f"game_box_{game_id}.html"
+        path.write_text(document, encoding="utf-8")
+        os.utime(path, ns=(modified_time_ns, modified_time_ns))
+
+    slate = discover_latest_mlb_slate(save_dir, sleep=lambda _: None)
+
+    assert slate.date == "08/02/2032"
+    assert [result.game_id for result in slate.results] == [999, 1001]
+    assert slate.modified_time_ns == anchor_ns + 11_000_000_000
+    assert slate.key == "slate:08/02/2032"
+
+
+def test_latest_non_mlb_box_does_not_hide_previous_mlb_slate(
+    tmp_path: Path,
+) -> None:
+    save_dir, game_files, anchor_ns = _create_slate(tmp_path)
+    path = game_files.box_score_path.parent / "game_box_999.html"
+    path.write_text(
+        _box_html(game_id=999, league_label="AAA"),
+        encoding="utf-8",
+    )
+    os.utime(path, ns=(anchor_ns + 1_000_000_000,) * 2)
+
+    slate = discover_latest_mlb_slate(save_dir, sleep=lambda _: None)
+
+    assert slate.date == "08/01/2032"
+    assert [result.game_id for result in slate.results] == [100]
+
+
+def test_new_box_appearing_between_snapshots_postpones_off_day(
+    tmp_path: Path,
+) -> None:
+    save_dir, game_files, anchor_ns = _create_slate(tmp_path)
+
+    def add_late_team_game(_: float) -> None:
+        path = game_files.box_score_path.parent / "game_box_101.html"
+        path.write_text(_box_html(game_id=101), encoding="utf-8")
+        os.utime(path, ns=(anchor_ns, anchor_ns))
+
+    with pytest.raises(ScoreSlateNotReadyError, match="still being written"):
+        discover_latest_mlb_slate(save_dir, sleep=add_late_team_game)
+
+
+def test_no_box_scores_has_a_clear_error(tmp_path: Path) -> None:
+    save_dir = tmp_path / "Empty.lg"
+    (save_dir / "news" / "html" / "box_scores").mkdir(parents=True)
+
+    with pytest.raises(NoMajorLeagueBoxScoresError, match="No game_box"):
+        discover_latest_mlb_slate(save_dir, sleep=lambda _: None)

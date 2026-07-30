@@ -12,7 +12,11 @@ from ootp_radio.box_score_parser import (
     BoxScoreError,
     discover_same_slate_results,
 )
-from ootp_radio.broadcast import BroadcastError, prepare_game_broadcast
+from ootp_radio.broadcast import (
+    BroadcastError,
+    prepare_game_broadcast,
+    prepare_off_day_broadcast,
+)
 from ootp_radio.broadcast_controller import build_latest_wins_controller
 from ootp_radio.config import load_config
 from ootp_radio.game_detector import (
@@ -22,7 +26,7 @@ from ootp_radio.game_detector import (
 )
 from ootp_radio.live_recap import prepare_latest_recap
 from ootp_radio.message_parser import MessageError, build_news_preview
-from ootp_radio.models import BroadcastSegment
+from ootp_radio.models import BroadcastSegment, GameDayEvent
 from ootp_radio.narration import (
     format_highlight_narration_chunks,
     format_recap_narration,
@@ -39,6 +43,7 @@ from ootp_radio.replay_strings import (
     HighlightNotAvailableError,
     parse_highlight_file,
 )
+from ootp_radio.radio_event import RadioEventError, detect_latest_radio_event
 from ootp_radio.speech import MacSaySpeaker, SpeechError
 from ootp_radio.state import StateError
 from ootp_radio.watcher import RecapWatcher
@@ -304,17 +309,29 @@ def _broadcast_preview(
     segments: Sequence[BroadcastSegment] | None,
 ) -> int:
     config = load_config(save_dir=save_dir, team_name=team_name)
-    game_files = detect_latest_game(config.save_dir)
+    event = detect_latest_radio_event(
+        config.save_dir,
+        team_name=config.team_name or team_name,
+    )
     requested_segments = (
         tuple(segments) if segments else _DEFAULT_BROADCAST_SEGMENTS
     )
-    plan = prepare_game_broadcast(
-        game_files,
-        team_name=config.team_name or team_name,
-        segments=requested_segments,
-    )
+    if isinstance(event, GameDayEvent):
+        plan = prepare_game_broadcast(
+            event.game_files,
+            team_name=config.team_name or team_name,
+            segments=requested_segments,
+        )
+        print(f"Game {plan.game_id} on {event.slate.date}")
+    else:
+        plan = prepare_off_day_broadcast(
+            event.slate,
+            save_dir=config.save_dir,
+            team_name=config.team_name or team_name,
+            segments=requested_segments,
+        )
+        print(f"Off day for {team_name} on {plan.date}")
 
-    print(f"Game {plan.game_id}")
     print(
         "Requested order: "
         + " -> ".join(segment.value for segment in plan.requested_order)
@@ -531,7 +548,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     broadcast_preview_parser = subparsers.add_parser(
         "broadcast-preview",
-        help="preview reorderable latest-game radio segments",
+        help="preview the latest game-day or off-day radio segments",
     )
     broadcast_preview_parser.add_argument(
         "--save-dir",
@@ -556,7 +573,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     watch_broadcast_parser = subparsers.add_parser(
         "watch-broadcast",
-        help="watch and play reorderable latest-wins game broadcasts",
+        help="watch and play reorderable latest-wins daily broadcasts",
     )
     watch_broadcast_parser.add_argument(
         "--save-dir",
@@ -582,12 +599,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--poll-interval",
         type=_positive_number,
         default=2.0,
-        help="seconds between new-game checks (default: 2)",
+        help="seconds between new-day checks (default: 2)",
     )
     watch_broadcast_parser.add_argument(
         "--play-current",
         action="store_true",
-        help="play the current latest game when listening starts",
+        help="play the current latest game or off day when listening starts",
     )
     watch_broadcast_parser.add_argument(
         "--voice",
@@ -678,6 +695,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         GameDetectionError,
         HighlightError,
         MessageError,
+        RadioEventError,
         RecapParseError,
         SaveDirectoryError,
         SpeechError,

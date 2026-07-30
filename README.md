@@ -1,9 +1,9 @@
 # OOTP 27 Radio Companion
 
-This repository currently contains Milestone 12B: the reorderable broadcast
-composer plus cancellable, latest-wins automatic playback. A stable newer game
-terminates obsolete audio, replaces pending work, and begins only the newest
-broadcast. The GUI and off-day detection are not connected yet.
+This repository currently contains Milestone 12C: reorderable, cancellable,
+latest-wins playback for both controlled-team games and off days. A stable
+newer day terminates obsolete audio, replaces pending work, and begins only the
+newest broadcast. The GUI is the next milestone.
 
 ## Requirements
 
@@ -28,7 +28,7 @@ pytest -q
 Expected result:
 
 ```text
-127 passed
+147 passed
 ```
 
 ## Preview the narration
@@ -52,7 +52,28 @@ python3 -m ootp_radio.cli recap-latest \
   --dry-run
 ```
 
-## Manual Milestone 12B test
+## Preview the latest complete day
+
+This command automatically distinguishes a Baltimore game from a Baltimore
+off day:
+
+```bash
+python3 -m ootp_radio.cli broadcast-preview \
+  --save-dir "/Users/timcocuzza/Application Support/Out of the Park Developments/OOTP Baseball 27/saved_games/first os.lg" \
+  --team-name "Baltimore Orioles" \
+  --segment highlights \
+  --segment team-recap \
+  --segment scores \
+  --segment news
+```
+
+On a game day, all selected segments are eligible. On an off day, Highlights
+and Team Recap are omitted, every MLB result in the slate is included under
+Scores, and qualifying new headlines remain last. If the slate contains
+Baltimore but its replay is still being written, classification waits rather
+than leaking Baltimore's final score as an apparent off day.
+
+## Manual Milestone 12C test
 
 With the environment active, run:
 
@@ -67,14 +88,29 @@ python3 -m ootp_radio.cli watch-broadcast \
   --play-current
 ```
 
-The current game begins immediately with Highlights. While it is speaking,
-complete or simulate another game. As soon as the newer replay and box score
-are stable, the old `say` process must stop and only the newest game may begin;
-intermediate pending games are replaced rather than queued. Press `Control-C`
-to stop listening and terminate active audio.
+The current complete day begins immediately. On a game day it starts with
+Highlights. On a Baltimore off day it silently omits Highlights and Team Recap,
+then starts with every available score around the league. While it is speaking,
+complete another game or advance through an off day. As soon as the newer event
+is stable, the old `say` process must stop and only the newest event may begin;
+intermediate work is replaced rather than queued. Press `Control-C` to stop
+listening and terminate active audio.
 
-The monitor rejects partially written replacements, never replays the same game,
-and continues listening after a manual playback stop. News remains lazily
-prepared last, so it cannot delay earlier selected segments. The production
-speaker uses `subprocess.Popen` without a shell and distinguishes deliberate
-cancellation from a genuine text-to-speech failure.
+The monitor rejects partially written score batches, never replays the same
+game or off-day date, and continues listening after a manual playback stop.
+News remains lazily prepared last, so it cannot delay earlier selected
+segments. The production speaker uses `subprocess.Popen` without a shell and
+distinguishes deliberate cancellation from a genuine text-to-speech failure.
+
+## Current module structure
+
+- `box_score_parser.py` parses MLB finals and discovers replay-anchored or
+  replay-free stable league slates.
+- `radio_event.py` resolves the selected OOTP team ID and safely classifies the
+  latest slate as a game day or off day.
+- `broadcast.py` lazily composes ordered game-day and off-day sections; News is
+  always pinned last.
+- `broadcast_controller.py` owns the single latest-wins playback slot and
+  interrupts obsolete macOS speech.
+- `speech.py` controls the macOS `say` process without changing OOTP files.
+- `cli.py` exposes previews and the watcher while the GUI is being built.

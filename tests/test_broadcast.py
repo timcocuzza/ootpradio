@@ -8,8 +8,10 @@ import pytest
 from ootp_radio.broadcast import (
     BroadcastConfigurationError,
     iter_game_broadcast_parts,
+    iter_off_day_broadcast_parts,
     normalize_segment_order,
     prepare_game_broadcast,
+    prepare_off_day_broadcast,
 )
 from ootp_radio.live_recap import PreparedLiveRecap
 from ootp_radio.message_parser import MessageBatchNotReadyError, MessageError
@@ -19,6 +21,7 @@ from ootp_radio.models import (
     GameHighlights,
     GameRecap,
     GameResult,
+    LeagueSlate,
     NewsMessage,
     NewsPreview,
     SelectedNewsMessage,
@@ -312,3 +315,84 @@ def test_blank_team_name_is_rejected_before_parsing() -> None:
             segments=(BroadcastSegment.HIGHLIGHTS,),
             sleep=lambda _: None,
         )
+
+
+def _off_day_slate() -> LeagueSlate:
+    return LeagueSlate(
+        date="08/04/2032",
+        results=(
+            GameResult(50, "08/04/2032", "Seattle Mariners", 3, "Texas Rangers", 2),
+            GameResult(90, "08/04/2032", "Miami Marlins", 0, "New York Mets", 4),
+        ),
+        modified_time_ns=2_000_000_000_000,
+    )
+
+
+def test_off_day_omits_team_segments_and_reads_every_league_score() -> None:
+    with patch(
+        "ootp_radio.broadcast.build_news_preview_at",
+        return_value=NewsPreview(examined_count=0, selected=()),
+    ):
+        plan = prepare_off_day_broadcast(
+            _off_day_slate(),
+            save_dir=Path("League.lg"),
+            team_name="Baltimore Orioles",
+            segments=(
+                BroadcastSegment.HIGHLIGHTS,
+                BroadcastSegment.TEAM_RECAP,
+                BroadcastSegment.SCORES,
+                BroadcastSegment.NEWS,
+            ),
+        )
+
+    assert [section.segment for section in plan.sections] == [
+        BroadcastSegment.SCORES
+    ]
+    assert plan.sections[0].chunks == (
+        "Around the league.",
+        "The Seattle Mariners defeated the Texas Rangers, 3 to 2.",
+        "The New York Mets defeated the Miami Marlins, 4 to 0.",
+    )
+    assert [issue.segment for issue in plan.issues] == [
+        BroadcastSegment.HIGHLIGHTS,
+        BroadcastSegment.TEAM_RECAP,
+        BroadcastSegment.NEWS,
+    ]
+    assert all("did not play" in issue.reason for issue in plan.issues[:2])
+
+
+def test_off_day_news_remains_last_and_lazy() -> None:
+    with patch(
+        "ootp_radio.broadcast.build_news_preview_at",
+        return_value=_news_preview(),
+    ) as build_news:
+        parts = iter_off_day_broadcast_parts(
+            _off_day_slate(),
+            save_dir=Path("League.lg"),
+            team_name="Baltimore Orioles",
+            segments=(BroadcastSegment.NEWS, BroadcastSegment.SCORES),
+        )
+        scores = next(parts)
+        build_news.assert_not_called()
+        news = next(parts)
+
+    assert scores.segment is BroadcastSegment.SCORES
+    assert news.segment is BroadcastSegment.NEWS
+    assert "body" not in " ".join(news.chunks).casefold()
+    build_news.assert_called_once()
+    assert build_news.call_args.kwargs["anchor_mtime_ns"] == 2_000_000_000_000
+
+
+def test_off_day_with_only_team_segments_is_safely_silent() -> None:
+    plan = prepare_off_day_broadcast(
+        _off_day_slate(),
+        save_dir=Path("League.lg"),
+        team_name="Baltimore Orioles",
+        segments=(
+            BroadcastSegment.HIGHLIGHTS,
+            BroadcastSegment.TEAM_RECAP,
+        ),
+    )
+
+    assert plan.sections == ()
+    assert len(plan.issues) == 2

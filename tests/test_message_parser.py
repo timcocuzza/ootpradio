@@ -10,7 +10,9 @@ from ootp_radio.message_parser import (
     MessageBatchNotReadyError,
     MessageParseError,
     build_news_preview,
+    build_news_preview_at,
     discover_recent_messages,
+    discover_recent_messages_at,
     filter_messages,
     parse_message_file,
     parse_message_text,
@@ -294,3 +296,61 @@ def test_build_preview_combines_discovery_and_filtering(tmp_path: Path) -> None:
     assert preview.examined_count == 2
     assert len(preview.selected) == 1
     assert preview.filtered_count == 1
+
+
+def test_off_day_news_uses_slate_timestamp_without_a_replay(
+    tmp_path: Path,
+) -> None:
+    game_files, messages_dir, anchor_ns = _create_message_batch(tmp_path)
+    game_files.replay_path.unlink()
+    selected = messages_dir / "message101.txt"
+    selected.write_text(
+        "Busch Tags Marlins for 5 Hits\n"
+        "<Philadelphia Phillies:team#21> defeated "
+        "<Miami Marlins:team#11>. <View Boxscore:box#300>",
+        encoding="utf-8",
+    )
+    os.utime(selected, ns=(anchor_ns + 10_000_000_000,) * 2)
+
+    preview = build_news_preview_at(
+        game_files.replay_path.parent.parent,
+        anchor_mtime_ns=anchor_ns,
+        team_name="Baltimore Orioles",
+        mlb_results=[
+            GameResult(
+                300,
+                "08/04/2032",
+                "Philadelphia Phillies",
+                5,
+                "Miami Marlins",
+                2,
+                21,
+                11,
+            )
+        ],
+        sleep=lambda _: None,
+    )
+
+    assert preview.examined_count == 1
+    assert [item.message.headline for item in preview.selected] == [
+        "Busch Tags Marlins for 5 Hits"
+    ]
+
+
+def test_off_day_message_batch_still_checks_for_mid_read_changes(
+    tmp_path: Path,
+) -> None:
+    game_files, messages_dir, anchor_ns = _create_message_batch(tmp_path)
+    message_path = messages_dir / "message101.txt"
+    message_path.write_text("Headline\nBody", encoding="utf-8")
+    os.utime(message_path, ns=(anchor_ns, anchor_ns))
+
+    def change_message(_: float) -> None:
+        message_path.write_text("Headline\nA changing body", encoding="utf-8")
+
+    with pytest.raises(MessageBatchNotReadyError, match="still being written"):
+        discover_recent_messages_at(
+            game_files.replay_path.parent.parent,
+            anchor_mtime_ns=anchor_ns,
+            sleep=change_message,
+        )
