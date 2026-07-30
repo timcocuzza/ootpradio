@@ -3,7 +3,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import StrEnum
 from pathlib import Path
+
+
+class BroadcastSegment(StrEnum):
+    """One independently ordered radio-broadcast segment."""
+
+    HIGHLIGHTS = "highlights"
+    TEAM_RECAP = "team-recap"
+    SCORES = "scores"
+    NEWS = "news"
 
 
 @dataclass(frozen=True)
@@ -79,6 +89,33 @@ class GameHighlights:
     game_id: int
     paragraphs: tuple[str, ...]
     source_path: Path
+
+
+@dataclass(frozen=True)
+class BroadcastSection:
+    """Ready-to-speak chunks for one enabled broadcast segment."""
+
+    segment: BroadcastSegment
+    chunks: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class BroadcastIssue:
+    """An enabled segment omitted because no content was available."""
+
+    segment: BroadcastSegment
+    reason: str
+
+
+@dataclass(frozen=True)
+class BroadcastPlan:
+    """Ordered sections and omissions for one game broadcast."""
+
+    game_id: int
+    requested_order: tuple[BroadcastSegment, ...]
+    effective_order: tuple[BroadcastSegment, ...]
+    sections: tuple[BroadcastSection, ...]
+    issues: tuple[BroadcastIssue, ...]
 
 
 @dataclass(frozen=True)

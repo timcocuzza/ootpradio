@@ -12,6 +12,7 @@ from ootp_radio.box_score_parser import (
     BoxScoreError,
     discover_same_slate_results,
 )
+from ootp_radio.broadcast import BroadcastError, prepare_game_broadcast
 from ootp_radio.config import load_config
 from ootp_radio.game_detector import (
     GameDetectionError,
@@ -20,6 +21,7 @@ from ootp_radio.game_detector import (
 )
 from ootp_radio.live_recap import prepare_latest_recap
 from ootp_radio.message_parser import MessageError, build_news_preview
+from ootp_radio.models import BroadcastSegment
 from ootp_radio.narration import (
     format_highlight_narration_chunks,
     format_recap_narration,
@@ -90,6 +92,16 @@ def _positive_number(value: str) -> float:
     if parsed_value <= 0:
         raise argparse.ArgumentTypeError("must be greater than zero")
     return parsed_value
+
+
+def _broadcast_segment(value: str) -> BroadcastSegment:
+    try:
+        return BroadcastSegment(value)
+    except ValueError as error:
+        choices = ", ".join(segment.value for segment in BroadcastSegment)
+        raise argparse.ArgumentTypeError(
+            f"unknown segment '{value}'; choose from: {choices}"
+        ) from error
 
 
 def _add_speech_arguments(parser: argparse.ArgumentParser) -> None:
@@ -273,6 +285,45 @@ def _speak_highlights(
     return 0
 
 
+def _broadcast_preview(
+    save_dir: Path,
+    *,
+    team_name: str,
+    segments: Sequence[BroadcastSegment] | None,
+) -> int:
+    config = load_config(save_dir=save_dir, team_name=team_name)
+    game_files = detect_latest_game(config.save_dir)
+    requested_segments = tuple(segments) if segments else (
+        BroadcastSegment.HIGHLIGHTS,
+        BroadcastSegment.TEAM_RECAP,
+        BroadcastSegment.SCORES,
+        BroadcastSegment.NEWS,
+    )
+    plan = prepare_game_broadcast(
+        game_files,
+        team_name=config.team_name or team_name,
+        segments=requested_segments,
+    )
+
+    print(f"Game {plan.game_id}")
+    print(
+        "Requested order: "
+        + " -> ".join(segment.value for segment in plan.requested_order)
+    )
+    print(
+        "Effective order: "
+        + " -> ".join(segment.value for segment in plan.effective_order)
+    )
+    for section in plan.sections:
+        print()
+        print(f"[{section.segment.value}]")
+        print("\n\n".join(section.chunks))
+    for issue in plan.issues:
+        print()
+        print(f"Skipped [{issue.segment.value}]: {issue.reason}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the command-line parser."""
     parser = argparse.ArgumentParser(
@@ -433,6 +484,31 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_speech_arguments(speak_highlights_parser)
 
+    broadcast_preview_parser = subparsers.add_parser(
+        "broadcast-preview",
+        help="preview reorderable latest-game radio segments",
+    )
+    broadcast_preview_parser.add_argument(
+        "--save-dir",
+        type=Path,
+        required=True,
+        help="path to the selected .lg saved-league directory",
+    )
+    broadcast_preview_parser.add_argument(
+        "--team-name",
+        required=True,
+        help="controlled organization name used for team-specific filtering",
+    )
+    broadcast_preview_parser.add_argument(
+        "--segment",
+        action="append",
+        type=_broadcast_segment,
+        help=(
+            "enabled segment in playback order; repeat as needed "
+            "(news is always moved to the end)"
+        ),
+    )
+
     return parser
 
 
@@ -490,8 +566,15 @@ def main(argv: Sequence[str] | None = None) -> int:
                 rate=args.rate,
                 dry_run=args.dry_run,
             )
+        if args.command == "broadcast-preview":
+            return _broadcast_preview(
+                args.save_dir,
+                team_name=args.team_name,
+                segments=args.segment,
+            )
     except (
         BoxScoreError,
+        BroadcastError,
         GameDetectionError,
         HighlightError,
         MessageError,

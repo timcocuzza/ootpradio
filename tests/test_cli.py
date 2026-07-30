@@ -5,6 +5,10 @@ from unittest.mock import patch
 
 from ootp_radio.cli import main
 from ootp_radio.models import (
+    BroadcastIssue,
+    BroadcastPlan,
+    BroadcastSection,
+    BroadcastSegment,
     GameFiles,
     GameHighlights,
     GameResult,
@@ -349,3 +353,65 @@ def test_speak_highlights_dry_run_prints_without_speaking(
     assert result == 0
     speak.assert_not_called()
     assert output == "Now, the game highlights.\n\nFirst scoring play.\n"
+
+
+def test_broadcast_preview_prints_effective_order_sections_and_omissions(
+    tmp_path: Path, capsys
+) -> None:
+    save_dir = _create_live_recap_save(tmp_path)
+    plan = BroadcastPlan(
+        game_id=1596,
+        requested_order=(
+            BroadcastSegment.NEWS,
+            BroadcastSegment.HIGHLIGHTS,
+            BroadcastSegment.TEAM_RECAP,
+        ),
+        effective_order=(
+            BroadcastSegment.HIGHLIGHTS,
+            BroadcastSegment.TEAM_RECAP,
+            BroadcastSegment.NEWS,
+        ),
+        sections=(
+            BroadcastSection(
+                BroadcastSegment.HIGHLIGHTS,
+                ("The pitch...", "The runner scores."),
+            ),
+            BroadcastSection(
+                BroadcastSegment.TEAM_RECAP,
+                ("This is WBAL News Radio. Orioles win.",),
+            ),
+        ),
+        issues=(
+            BroadcastIssue(
+                BroadcastSegment.NEWS,
+                "no qualifying new MLB headlines were found",
+            ),
+        ),
+    )
+
+    with patch("ootp_radio.cli.detect_latest_game"):
+        with patch(
+            "ootp_radio.cli.prepare_game_broadcast", return_value=plan
+        ):
+            result = main(
+                [
+                    "broadcast-preview",
+                    "--save-dir",
+                    str(save_dir),
+                    "--team-name",
+                    "Baltimore Orioles",
+                    "--segment",
+                    "news",
+                    "--segment",
+                    "highlights",
+                    "--segment",
+                    "team-recap",
+                ]
+            )
+
+    output = capsys.readouterr().out
+    assert result == 0
+    assert "Effective order: highlights -> team-recap -> news" in output
+    assert output.index("[highlights]") < output.index("[team-recap]")
+    assert "The pitch...\n\nThe runner scores." in output
+    assert "Skipped [news]" in output

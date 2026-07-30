@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from types import MappingProxyType
 
-from ootp_radio.models import GameHighlights, GameRecap, GameResult
+from ootp_radio.models import GameHighlights, GameRecap, GameResult, NewsPreview
 
 TEAM_RADIO_STATIONS: Mapping[str, str] = MappingProxyType(
     {
@@ -112,3 +112,31 @@ def format_highlight_narration_chunks(
 ) -> tuple[str, ...]:
     """Keep highlight plays separate for paced, interruptible speech."""
     return ("Now, the game highlights.", *highlights.paragraphs)
+
+
+def format_broadcast_score_chunks(
+    results: Sequence[GameResult],
+    *,
+    played_game_id: int,
+) -> tuple[str, ...]:
+    """Format an order-independent score segment as stoppable chunks."""
+    other_results = tuple(
+        result for result in results if result.game_id != played_game_id
+    )
+    if not other_results:
+        return ()
+    return (
+        "Around the league.",
+        *(format_score_sentence(result) for result in other_results),
+    )
+
+
+def format_news_headline_chunks(preview: NewsPreview) -> tuple[str, ...]:
+    """Format only selected headlines; message bodies are never narrated."""
+    if not preview.selected:
+        return ()
+    headlines = tuple(
+        _finish_sentence(selected.message.headline)
+        for selected in preview.selected
+    )
+    return ("League news.", *headlines)
