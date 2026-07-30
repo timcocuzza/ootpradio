@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from types import MappingProxyType
 
-from ootp_radio.models import GameRecap, GameResult
+from ootp_radio.models import GameHighlights, GameRecap, GameResult
 
 TEAM_RADIO_STATIONS: Mapping[str, str] = MappingProxyType(
     {
@@ -105,3 +105,10 @@ def append_around_league_narration(
     if not score_segment:
         return recap_narration
     return f"{recap_narration}\n\n{score_segment}"
+
+
+def format_highlight_narration_chunks(
+    highlights: GameHighlights,
+) -> tuple[str, ...]:
+    """Keep highlight plays separate for paced, interruptible speech."""
+    return ("Now, the game highlights.", *highlights.paragraphs)

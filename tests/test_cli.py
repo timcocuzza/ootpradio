@@ -6,6 +6,7 @@ from unittest.mock import patch
 from ootp_radio.cli import main
 from ootp_radio.models import (
     GameFiles,
+    GameHighlights,
     GameResult,
     NewsMessage,
     NewsPreview,
@@ -283,3 +284,68 @@ def test_highlights_preview_reports_missing_latest_highlight(
 
     assert result == 2
     assert "has not created highlight_1596.rpl" in capsys.readouterr().err
+
+
+def test_speak_highlights_uses_system_voice_and_separate_chunks(
+    tmp_path: Path,
+) -> None:
+    save_dir = _create_live_recap_save(tmp_path)
+    highlight_path = save_dir / "replays" / "highlight_1596.rpl"
+    highlight_path.write_bytes(b"highlight")
+    highlights = GameHighlights(
+        game_id=1596,
+        paragraphs=("First scoring play.", "Second scoring play."),
+        source_path=highlight_path,
+    )
+
+    with patch("ootp_radio.cli.ensure_game_files_stable"):
+        with patch(
+            "ootp_radio.cli.parse_highlight_file", return_value=highlights
+        ):
+            with patch("ootp_radio.cli.MacSaySpeaker") as speaker_class:
+                result = main(
+                    ["speak-highlights", "--save-dir", str(save_dir)]
+                )
+
+    assert result == 0
+    speaker_class.assert_called_once_with(voice=None, rate=None)
+    spoken_chunks = [
+        call.args[0] for call in speaker_class.return_value.speak.call_args_list
+    ]
+    assert spoken_chunks == [
+        "Now, the game highlights.",
+        "First scoring play.",
+        "Second scoring play.",
+    ]
+
+
+def test_speak_highlights_dry_run_prints_without_speaking(
+    tmp_path: Path, capsys
+) -> None:
+    save_dir = _create_live_recap_save(tmp_path)
+    highlight_path = save_dir / "replays" / "highlight_1596.rpl"
+    highlight_path.write_bytes(b"highlight")
+    highlights = GameHighlights(
+        game_id=1596,
+        paragraphs=("First scoring play.",),
+        source_path=highlight_path,
+    )
+
+    with patch("ootp_radio.cli.ensure_game_files_stable"):
+        with patch(
+            "ootp_radio.cli.parse_highlight_file", return_value=highlights
+        ):
+            with patch("ootp_radio.cli.MacSaySpeaker.speak") as speak:
+                result = main(
+                    [
+                        "speak-highlights",
+                        "--save-dir",
+                        str(save_dir),
+                        "--dry-run",
+                    ]
+                )
+
+    output = capsys.readouterr().out
+    assert result == 0
+    speak.assert_not_called()
+    assert output == "Now, the game highlights.\n\nFirst scoring play.\n"

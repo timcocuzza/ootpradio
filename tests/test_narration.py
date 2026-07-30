@@ -1,9 +1,12 @@
 """Tests for deterministic recap narration formatting."""
 
-from ootp_radio.models import GameRecap, GameResult
+from pathlib import Path
+
+from ootp_radio.models import GameHighlights, GameRecap, GameResult
 from ootp_radio.narration import (
     append_around_league_narration,
     format_around_league_narration,
+    format_highlight_narration_chunks,
     format_recap_narration,
 )
 
@@ -79,3 +82,19 @@ def test_no_other_results_leaves_recap_narration_unchanged() -> None:
     )
 
     assert combined == recap_narration
+
+
+def test_highlight_narration_keeps_intro_and_plays_in_separate_chunks() -> None:
+    highlights = GameHighlights(
+        game_id=1596,
+        paragraphs=("First scoring play.", "Second scoring play."),
+        source_path=Path("highlight_1596.rpl"),
+    )
+
+    chunks = format_highlight_narration_chunks(highlights)
+
+    assert chunks == (
+        "Now, the game highlights.",
+        "First scoring play.",
+        "Second scoring play.",
+    )

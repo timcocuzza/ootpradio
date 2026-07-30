@@ -20,7 +20,11 @@ from ootp_radio.game_detector import (
 )
 from ootp_radio.live_recap import prepare_latest_recap
 from ootp_radio.message_parser import MessageError, build_news_preview
-from ootp_radio.narration import format_recap_narration, format_score_sentence
+from ootp_radio.narration import (
+    format_highlight_narration_chunks,
+    format_recap_narration,
+    format_score_sentence,
+)
 from ootp_radio.paths import SaveDirectoryError, validate_save_dir
 from ootp_radio.recap_parser import RecapParseError, parse_recap_file
 from ootp_radio.replay_strings import (
@@ -241,6 +245,34 @@ def _highlights_preview(save_dir: Path) -> int:
     return 0
 
 
+def _speak_highlights(
+    save_dir: Path,
+    *,
+    voice: str | None,
+    rate: int | None,
+    dry_run: bool,
+) -> int:
+    config = load_config(save_dir=save_dir)
+    game_files = detect_latest_game(config.save_dir)
+    ensure_game_files_stable(game_files)
+    if game_files.highlight_path is None:
+        raise HighlightNotAvailableError(
+            f"OOTP has not created highlight_{game_files.game_id}.rpl for the "
+            "latest played game."
+        )
+
+    highlights = parse_highlight_file(game_files.highlight_path)
+    chunks = format_highlight_narration_chunks(highlights)
+    if dry_run:
+        print("\n\n".join(chunks))
+        return 0
+
+    speaker = MacSaySpeaker(voice=voice, rate=rate)
+    for chunk in chunks:
+        speaker.speak(chunk)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the command-line parser."""
     parser = argparse.ArgumentParser(
@@ -389,6 +421,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="path to the selected .lg saved-league directory",
     )
 
+    speak_highlights_parser = subparsers.add_parser(
+        "speak-highlights",
+        help="speak the latest game's extracted highlight commentary",
+    )
+    speak_highlights_parser.add_argument(
+        "--save-dir",
+        type=Path,
+        required=True,
+        help="path to the selected .lg saved-league directory",
+    )
+    _add_speech_arguments(speak_highlights_parser)
+
     return parser
 
 
@@ -439,6 +483,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _news_preview(args.save_dir, team_name=args.team_name)
         if args.command == "highlights-preview":
             return _highlights_preview(args.save_dir)
+        if args.command == "speak-highlights":
+            return _speak_highlights(
+                args.save_dir,
+                voice=args.voice,
+                rate=args.rate,
+                dry_run=args.dry_run,
+            )
     except (
         BoxScoreError,
         GameDetectionError,
