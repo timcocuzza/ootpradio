@@ -7,7 +7,9 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+from ootp_radio.narration import format_recap_narration
 from ootp_radio.recap_parser import RecapParseError, parse_recap_file
+from ootp_radio.speech import MacSaySpeaker, SpeechError
 
 
 def _print_recap(box_score: Path) -> int:
@@ -16,6 +18,31 @@ def _print_recap(box_score: Path) -> int:
     print()
     print(recap.body)
     return 0
+
+
+def _speak_recap(
+    box_score: Path,
+    *,
+    voice: str | None,
+    rate: int | None,
+    dry_run: bool,
+) -> int:
+    recap = parse_recap_file(box_score)
+    narration = format_recap_narration(recap)
+
+    if dry_run:
+        print(narration)
+        return 0
+
+    MacSaySpeaker(voice=voice, rate=rate).speak(narration)
+    return 0
+
+
+def _positive_integer(value: str) -> int:
+    parsed_value = int(value)
+    if parsed_value <= 0:
+        raise argparse.ArgumentTypeError("must be greater than zero")
+    return parsed_value
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -36,6 +63,30 @@ def build_parser() -> argparse.ArgumentParser:
         help="path to a game_box_<GAME_ID>.html file",
     )
 
+    speak_recap_parser = subparsers.add_parser(
+        "speak-recap",
+        help="speak the marked recap from one game box score",
+    )
+    speak_recap_parser.add_argument(
+        "box_score",
+        type=Path,
+        help="path to a game_box_<GAME_ID>.html file",
+    )
+    speak_recap_parser.add_argument(
+        "--voice",
+        help="override the voice configured in macOS",
+    )
+    speak_recap_parser.add_argument(
+        "--rate",
+        type=_positive_integer,
+        help="override the configured speech rate in words per minute",
+    )
+    speak_recap_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="print the final narration without speaking",
+    )
+
     return parser
 
 
@@ -51,7 +102,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         if args.command == "parse-recap":
             return _print_recap(args.box_score)
-    except RecapParseError as error:
+        if args.command == "speak-recap":
+            return _speak_recap(
+                args.box_score,
+                voice=args.voice,
+                rate=args.rate,
+                dry_run=args.dry_run,
+            )
+    except (RecapParseError, SpeechError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 2
 

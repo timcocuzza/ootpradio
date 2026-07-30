@@ -1,9 +1,8 @@
 # OOTP 27 Radio Companion
 
-This repository currently contains Milestone 1: a minimal Python package, the
-four game-1596 regression fixtures, and deterministic extraction of the recap
-subject and body from OOTP's explicit HTML comment markers. It does not speak
-game data or access a live save yet.
+This repository currently contains Milestone 2: deterministic extraction of
+the static game-1596 recap and safe narration through macOS text-to-speech. It
+does not access a live OOTP save yet.
 
 ## Requirements
 
@@ -28,23 +27,37 @@ pytest -q
 Expected result:
 
 ```text
-7 passed
+14 passed
 ```
 
-## Manual Milestone 1 test
+## Preview the narration
+
+To print exactly what would be spoken without producing audio:
+
+```bash
+python3 -m ootp_radio.cli speak-recap tests/fixtures/game_1596/game_box_1596.html --dry-run
+```
+
+The narration begins with WBAL News Radio because the recap mentions the
+Baltimore Orioles. Baltimore is currently the only team-to-station mapping.
+
+## Manual Milestone 2 test
 
 With the environment active, run:
 
 ```bash
-python3 -m ootp_radio.cli parse-recap tests/fixtures/game_1596/game_box_1596.html
+python3 -m ootp_radio.cli speak-recap tests/fixtures/game_1596/game_box_1596.html
 ```
 
-The command should exit successfully. Its first line should be:
+The Mac should read the cleaned recap aloud, beginning with:
 
 ```text
-Baltimore Gets 7-4 Win
+This is WBAL News Radio. Your Baltimore Orioles postgame report.
 ```
 
-The recap should contain readable paragraphs and no HTML tags or recap-marker
-comments. This milestone only prints the static fixture; speech and live-save
-access deliberately remain out of scope.
+By default, the application does not pass a voice or rate to `say`, allowing
+macOS to use the user's configured text-to-speech settings. `--voice` and
+`--rate` can explicitly override those settings. No HTML should be spoken.
+
+This milestone only speaks the static fixture. Live-save access deliberately
+remains out of scope.
