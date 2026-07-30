@@ -244,3 +244,42 @@ def test_news_preview_prints_counts_reason_and_clean_excerpt(
     assert "Orioles News" in output
     assert "Baltimore Orioles announced a roster move." not in output
     assert "Preview:" not in output
+
+
+def test_highlights_preview_prints_latest_sequences_without_speech(
+    tmp_path: Path, capsys
+) -> None:
+    save_dir = _create_live_recap_save(tmp_path)
+    highlight_path = save_dir / "replays" / "highlight_1596.rpl"
+    highlight_path.write_bytes(
+        b"highlight_1596.rpl\x00Bradfield Jr.\x00"
+        b"Cardozo delivers an RBI double.\x00"
+        b"The score is 1-0, Orioles in front.\x00"
+    )
+
+    with patch("ootp_radio.cli.ensure_game_files_stable"):
+        with patch("ootp_radio.cli.MacSaySpeaker.speak") as speak:
+            with patch("ootp_radio.replay_strings.time.sleep"):
+                result = main(
+                    ["highlights-preview", "--save-dir", str(save_dir)]
+                )
+
+    output = capsys.readouterr().out
+    speak.assert_not_called()
+    assert result == 0
+    assert output.startswith("Game 1596: 1 highlight sequences")
+    assert "Highlight 1:" in output
+    assert "Cardozo delivers an RBI double." in output
+    assert not output.startswith("highlight_1596.rpl")
+
+
+def test_highlights_preview_reports_missing_latest_highlight(
+    tmp_path: Path, capsys
+) -> None:
+    save_dir = _create_live_recap_save(tmp_path)
+
+    with patch("ootp_radio.cli.ensure_game_files_stable"):
+        result = main(["highlights-preview", "--save-dir", str(save_dir)])
+
+    assert result == 2
+    assert "has not created highlight_1596.rpl" in capsys.readouterr().err

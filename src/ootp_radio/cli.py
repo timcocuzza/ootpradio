@@ -23,6 +23,11 @@ from ootp_radio.message_parser import MessageError, build_news_preview
 from ootp_radio.narration import format_recap_narration, format_score_sentence
 from ootp_radio.paths import SaveDirectoryError, validate_save_dir
 from ootp_radio.recap_parser import RecapParseError, parse_recap_file
+from ootp_radio.replay_strings import (
+    HighlightError,
+    HighlightNotAvailableError,
+    parse_highlight_file,
+)
 from ootp_radio.speech import MacSaySpeaker, SpeechError
 from ootp_radio.state import StateError
 from ootp_radio.watcher import RecapWatcher
@@ -214,6 +219,28 @@ def _news_preview(save_dir: Path, *, team_name: str) -> int:
     return 0
 
 
+def _highlights_preview(save_dir: Path) -> int:
+    config = load_config(save_dir=save_dir)
+    game_files = detect_latest_game(config.save_dir)
+    ensure_game_files_stable(game_files)
+    if game_files.highlight_path is None:
+        raise HighlightNotAvailableError(
+            f"OOTP has not created highlight_{game_files.game_id}.rpl for the "
+            "latest played game."
+        )
+
+    highlights = parse_highlight_file(game_files.highlight_path)
+    print(
+        f"Game {highlights.game_id}: "
+        f"{len(highlights.paragraphs)} highlight sequences"
+    )
+    for sequence_number, paragraph in enumerate(highlights.paragraphs, start=1):
+        print()
+        print(f"Highlight {sequence_number}:")
+        print(paragraph)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the command-line parser."""
     parser = argparse.ArgumentParser(
@@ -351,6 +378,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="controlled organization name used for team-specific filtering",
     )
 
+    highlights_preview_parser = subparsers.add_parser(
+        "highlights-preview",
+        help="preview commentary extracted from the latest highlight replay",
+    )
+    highlights_preview_parser.add_argument(
+        "--save-dir",
+        type=Path,
+        required=True,
+        help="path to the selected .lg saved-league directory",
+    )
+
     return parser
 
 
@@ -399,9 +437,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _scores_latest(args.save_dir)
         if args.command == "news-preview":
             return _news_preview(args.save_dir, team_name=args.team_name)
+        if args.command == "highlights-preview":
+            return _highlights_preview(args.save_dir)
     except (
         BoxScoreError,
         GameDetectionError,
+        HighlightError,
         MessageError,
         RecapParseError,
         SaveDirectoryError,

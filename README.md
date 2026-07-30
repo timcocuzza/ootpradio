@@ -1,8 +1,8 @@
 # OOTP 27 Radio Companion
 
-This repository currently contains Milestone 9: the recap and score broadcast
-plus printed parsing and conservative filtering of recent OOTP messages. News
-is not connected to speech yet.
+This repository currently contains Milestone 10: the recap and score broadcast,
+printed MLB news filtering, and experimental printed extraction of OOTP's
+binary highlight commentary. News and highlights are not connected to speech.
 
 ## Requirements
 
@@ -27,7 +27,7 @@ pytest -q
 Expected result:
 
 ```text
-89 passed
+97 passed
 ```
 
 ## Preview the narration
@@ -51,26 +51,21 @@ python3 -m ootp_radio.cli recap-latest \
   --dry-run
 ```
 
-## Manual Milestone 9 test
+## Manual Milestone 10 test
 
 With the environment active, run:
 
 ```bash
-python3 -m ootp_radio.cli news-preview \
-  --save-dir "/Users/timcocuzza/Application Support/Out of the Park Developments/OOTP Baseball 27/saved_games/first os.lg" \
-  --team-name "Baltimore Orioles"
+python3 -m ootp_radio.cli highlights-preview \
+  --save-dir "/Users/timcocuzza/Application Support/Out of the Park Developments/OOTP Baseball 27/saved_games/first os.lg"
 ```
 
-For the current latest-game batch, the command should report `5 recent messages
-examined`, `1 selected`, and `4 filtered out`. The selected headline is `Busch
-Tags Marlins for 5 Hits`; the three minor-league stories and one scouting report
-are filtered out.
+The command should identify the latest game, report how many highlight sequences
+were found, and print each sequence in game order. Standalone roster metadata,
+binary noise, and the raw filename are excluded. Sentences that legitimately
+mention a repeated player name remain intact.
 
-Selected messages include a cleaned headline and the exact selection reason.
-Bodies and entity tags are parsed only to classify whether a story belongs to
-MLB; they are not included in the headline-only output. News remains a printed
-preview and is never spoken in this milestone.
-
-Message batches are associated with the latest replay using a tested 30-second
-modification-time window; the current save writes messages roughly 12 seconds
-after its replay and box-score files.
+The extractor is pure Python and read-only; it does not invoke the external
+`strings` utility or modify the OOTP file. Recap mode does not depend on this
+experimental parser. Highlight speech remains disabled until the preview text
+is approved across multiple games.

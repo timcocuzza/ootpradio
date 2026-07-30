@@ -73,6 +73,15 @@ class NewsPreview:
 
 
 @dataclass(frozen=True)
+class GameHighlights:
+    """Narration-friendly commentary extracted from a highlight replay."""
+
+    game_id: int
+    paragraphs: tuple[str, ...]
+    source_path: Path
+
+
+@dataclass(frozen=True)
 class GameRecap:
     """A cleaned recap extracted from an OOTP game box score."""
 
