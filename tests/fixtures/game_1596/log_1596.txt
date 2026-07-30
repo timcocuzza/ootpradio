@@ -1,0 +1,537 @@
+[%T]	Top of the 1st - Baltimore Orioles batting - Pitching for Detroit Tigers : RHP <a href="../players/player_39323.html">Bryan Woo</a>
+[%B]	Pitching: RHP <a href="../players/player_39323.html">Bryan Woo</a>
+[%B]	Batting: SHB <a href="../players/player_45910.html">Aron Estrada</a>
+[%N]	0-0: Foul Ball, location: 7LDF
+[%N]	0-1: Ball
+[%N]	1-1: Swinging Strike
+[%N]	1-2: Foul Ball, location: 7LSF
+[%N]	1-2: Ball
+[%N]	2-2: Ball
+[%N]	3-2: Foul Ball, location: 9LDF
+[%N]	3-2: <b>SINGLE</b>  (Groundball, 6MS, EV 54 MPH) (infield hit)
+[%B]	Batting: RHB <a href="../players/player_141414.html">Hyun-woo Kim</a>
+[%N]	0-0: Called Strike
+[%N]	0-1:  Fly out, F9  (Flyball, 89D, EV 84 MPH)
+[%B]	Batting: LHB <a href="../players/player_43247.html">Jackson Holliday</a>
+[%N]	0-0: Foul Ball, location: 2F
+[%N]	0-1: Foul Ball, location: 7LSF
+[%N]	0-2: Ball
+[%N]	1-2: Ball
+[%N]	2-2: Grounds into double play, 4-6-3 (Groundball, 4, EV 101 MPH)
+[%F]	Top of the 1st over - 0 runs, 1 hit, 0 errors, 0 left on base; Baltimore 0 - Detroit 0
+[%T]	Bottom of the 1st - Detroit Tigers batting - Pitching for Baltimore Orioles : RHP <a href="../players/player_45447.html">Parker Hutyra</a>
+[%B]	Pitching: RHP <a href="../players/player_45447.html">Parker Hutyra</a>
+[%B]	Batting: LHB <a href="../players/player_24593.html">Enrique Bradfield Jr.</a>
+[%N]	0-0: Ball
+[%N]	1-0: Called Strike
+[%N]	1-1: Ball
+[%N]	2-1: Foul Ball, location: 5SF
+[%N]	2-2: Foul Ball, location: 25F
+[%N]	2-2: Strikes out swinging
+[%B]	Batting: SHB <a href="../players/player_39051.html">Adael Amador</a>
+[%N]	0-0: Ball
+[%N]	1-0: Swinging Strike
+[%N]	1-1: Foul Ball, location: 2F
+[%N]	1-2: Ball
+[%N]	2-2: Foul Ball, location: 2F
+[%N]	2-2: Ball
+[%N]	3-2: Base on Balls
+[%B]	Batting: LHB <a href="../players/player_41427.html">Max Clark</a>
+[%N]	0-0:  Fly out, F9  (Flyball, 89S, EV 63 MPH)
+[%B]	Batting: RHB <a href="../players/player_43437.html">Beau Ankeney</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	<a href="../players/player_39051.html">Adael Amador</a> steals 2nd base
+[%N]	1-1: Foul Ball, location: 9LDF
+[%N]	1-2: Strikes out looking
+[%F]	Bottom of the 1st over - 0 runs, 0 hits, 0 errors, 1 left on base; Baltimore 0 - Detroit 0
+[%T]	Top of the 2nd - Baltimore Orioles batting - Pitching for Detroit Tigers : RHP <a href="../players/player_39323.html">Bryan Woo</a>
+[%B]	Batting: SHB <a href="../players/player_44026.html">DJ Layton</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Foul Ball, location: 5F
+[%N]	0-2: Ball
+[%N]	1-2: Foul Ball, location: 2F
+[%N]	1-2: Ball
+[%N]	2-2: Foul Ball, location: 7LSF
+[%N]	2-2: Ball
+[%N]	3-2: <b>SINGLE</b>  (Groundball, 56D, EV 87 MPH)
+[%B]	Batting: LHB <a href="../players/player_45934.html">Thomas Sosa</a>
+[%N]	0-0: Foul Ball, location: 7LDF
+[%N]	0-1: Called Strike
+[%N]	0-2: Ball
+[%N]	1-2: Foul Ball, location: 3DF
+[%N]	1-2: Ball
+[%N]	2-2: Strikes out swinging
+[%B]	Batting: SHB <a href="../players/player_45691.html">Leandro Arias</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ground out 6-3 (Groundball, 6M, EV 106 MPH)
+[%N]	<a href="../players/player_44026.html">DJ Layton</a> to second
+[%B]	Batting: RHB <a href="../players/player_130337.html">Ronald Cardozo</a>
+[%N]	0-0: <b>DOUBLE</b>  (Groundball, 5L, EV 89 MPH)
+[%N]	<b><a href="../players/player_44026.html">DJ Layton</a> scores</b>
+[%B]	Batting: RHB <a href="../players/player_129957.html">Jose Luis Acevedo</a>
+[%N]	0-0: Ball
+[%N]	1-0: Foul Ball, location: 5SF
+[%N]	1-1: Foul Ball, location: 3FF
+[%N]	1-2: Ball
+[%N]	2-2: Ball
+[%N]	3-2: Strikes out swinging
+[%F]	Top of the 2nd over - 1 run, 2 hits, 0 errors, 1 left on base; Baltimore 1 - Detroit 0
+[%T]	Bottom of the 2nd - Detroit Tigers batting - Pitching for Baltimore Orioles : RHP <a href="../players/player_45447.html">Parker Hutyra</a>
+[%B]	Batting: RHB <a href="../players/player_44920.html">Nick Dumesnil</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: Ball
+[%N]	2-1: Swinging Strike
+[%N]	2-2: Ball
+[%N]	3-2: Base on Balls
+[%B]	Batting: RHB <a href="../players/player_23190.html">Spencer Torkelson</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: Foul Ball, location: 5F
+[%N]	1-2: Strikes out swinging
+[%B]	Batting: RHB <a href="../players/player_41389.html">Angel Cepeda</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Foul Ball, location: 2RF
+[%N]	0-2: Foul Ball, location: 3F
+[%N]	0-2: Foul Ball, location: 5F
+[%N]	0-2: Ball
+[%N]	1-2: Ball
+[%N]	2-2: Foul Ball, location: 2F
+[%N]	2-2: Ball
+[%N]	3-2:  Fly out, F9  (Flyball, 89M, EV 86 MPH)
+[%B]	Batting: SHB <a href="../players/player_28737.html">Francisco Lindor</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Foul Ball, location: 2F
+[%N]	0-2: <b>SINGLE</b>  (Line Drive, 8LS, EV 93 MPH)
+[%N]	<a href="../players/player_44920.html">Nick Dumesnil</a> to second
+[%B]	Batting: RHB <a href="../players/player_38854.html">Dillon Dingler</a>
+[%N]	0-0: Ball
+[%N]	1-0: Swinging Strike
+[%N]	1-1: Swinging Strike
+[%N]	1-2: Fielders Choice at 2nd, 6-4 (Groundball, 6D, EV 114 MPH)
+[%F]	Bottom of the 2nd over - 0 runs, 1 hit, 0 errors, 2 left on base; Baltimore 1 - Detroit 0
+[%T]	Top of the 3rd - Baltimore Orioles batting - Pitching for Detroit Tigers : RHP <a href="../players/player_39323.html">Bryan Woo</a>
+[%B]	Batting: RHB <a href="../players/player_36584.html">Ceddanne Rafaela</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1:  Fly out, F3  (Popup, 3SF, EV 55 MPH)
+[%B]	Batting: SHB <a href="../players/player_45910.html">Aron Estrada</a>
+[%N]	0-0: Ball
+[%N]	1-0: Ball
+[%N]	2-0: Ball
+[%N]	3-0: Called Strike
+[%N]	3-1: Swinging Strike
+[%N]	3-2: Ground out 4-3 (Groundball, 4M, EV 106 MPH)
+[%B]	Batting: RHB <a href="../players/player_141414.html">Hyun-woo Kim</a>
+[%N]	0-0: Ball
+[%N]	1-0: Ground out 6-3 (Groundball, 6S, EV 66 MPH)
+[%F]	Top of the 3rd over - 0 runs, 0 hits, 0 errors, 0 left on base; Baltimore 1 - Detroit 0
+[%T]	Bottom of the 3rd - Detroit Tigers batting - Pitching for Baltimore Orioles : RHP <a href="../players/player_45447.html">Parker Hutyra</a>
+[%B]	Batting: LHB <a href="../players/player_24593.html">Enrique Bradfield Jr.</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Foul Ball, location: 5SF
+[%N]	0-2: Ground out 6-3 (Groundball, 6S, EV 58 MPH)
+[%B]	Batting: SHB <a href="../players/player_39051.html">Adael Amador</a>
+[%N]	0-0: Ball
+[%N]	1-0: Ball
+[%N]	2-0: Swinging Strike
+[%N]	2-1: Foul Ball, location: 2F
+[%N]	2-2: Ground out 6-3 (Groundball, 6MS, EV 64 MPH)
+[%B]	Batting: LHB <a href="../players/player_41427.html">Max Clark</a>
+[%N]	0-0: Ball
+[%N]	1-0: Called Strike
+[%N]	1-1: Ball
+[%N]	2-1: Reached via error on a dropped throw from 1B, E1 (Groundball, 34S, EV 66 MPH)
+[%B]	Batting: RHB <a href="../players/player_43437.html">Beau Ankeney</a>
+[%N]	0-0: Ball
+[%N]	1-0: Ball
+[%N]	2-0: Called Strike
+[%N]	2-1: Called Strike
+[%N]	2-2:  Fly out, F7  (Flyball, 7, EV 88 MPH)
+[%F]	Bottom of the 3rd over - 0 runs, 0 hits, 1 error, 1 left on base; Baltimore 1 - Detroit 0
+[%T]	Top of the 4th - Baltimore Orioles batting - Pitching for Detroit Tigers : RHP <a href="../players/player_39323.html">Bryan Woo</a>
+[%B]	Batting: LHB <a href="../players/player_43247.html">Jackson Holliday</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: Called Strike
+[%N]	1-2: Ball
+[%N]	2-2: Ground out U3 (Groundball, 34S, EV 114 MPH)
+[%B]	Batting: SHB <a href="../players/player_44026.html">DJ Layton</a>
+[%N]	0-0: Ball
+[%N]	1-0: Ball
+[%N]	2-0: Called Strike
+[%N]	2-1: Ball
+[%N]	3-1: Base on Balls
+[%B]	Batting: LHB <a href="../players/player_45934.html">Thomas Sosa</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: Called Strike
+[%N]	1-2: Ball
+[%N]	2-2: Ball
+[%N]	3-2: Foul Ball, location: 23F
+[%N]	3-2: <b>SINGLE</b>  (Line Drive, 78M, EV 85 MPH)
+[%N]	<a href="../players/player_44026.html">DJ Layton</a> to second
+[%N]	<a href="../players/player_44026.html">DJ Layton</a> to third
+[%B]	Batting: SHB <a href="../players/player_45691.html">Leandro Arias</a>
+[%N]	0-0: <b>SINGLE</b>  (Groundball, 56S, EV 84 MPH) (infield hit)
+[%N]	<b><a href="../players/player_44026.html">DJ Layton</a> scores</b>
+[%N]	<a href="../players/player_45934.html">Thomas Sosa</a> to second
+[%B]	Batting: RHB <a href="../players/player_130337.html">Ronald Cardozo</a>
+[%N]	0-0: Ball
+[%N]	1-0: Ground out 6-3 (Groundball, 6, EV 66 MPH)
+[%N]	<a href="../players/player_45934.html">Thomas Sosa</a> to third
+[%N]	<a href="../players/player_45691.html">Leandro Arias</a> to second
+[%B]	Batting: RHB <a href="../players/player_129957.html">Jose Luis Acevedo</a>
+[%N]	0-0: Swinging Strike
+[%N]	0-1: Ball
+[%N]	1-1: Ground out 3-1 (Groundball, 23, EV 82 MPH)
+[%F]	Top of the 4th over - 1 run, 2 hits, 0 errors, 2 left on base; Baltimore 2 - Detroit 0
+[%T]	Bottom of the 4th - Detroit Tigers batting - Pitching for Baltimore Orioles : RHP <a href="../players/player_45447.html">Parker Hutyra</a>
+[%B]	Batting: RHB <a href="../players/player_44920.html">Nick Dumesnil</a>
+[%N]	0-0: Foul Ball, location: 2F
+[%N]	0-1: Ball
+[%N]	1-1: Ball
+[%N]	2-1: Ball
+[%N]	3-1: Swinging Strike
+[%N]	3-2: Foul Ball, location: 9LSF
+[%N]	3-2: Strikes out swinging
+[%B]	Batting: RHB <a href="../players/player_23190.html">Spencer Torkelson</a>
+[%N]	0-0: Ball
+[%N]	1-0: Foul Ball, location: 9LSF
+[%N]	1-1: Ball
+[%N]	2-1: Ball
+[%N]	3-1: Foul Ball, location: 2F
+[%N]	3-2: Base on Balls
+[%B]	Batting: RHB <a href="../players/player_41389.html">Angel Cepeda</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Swinging Strike
+[%N]	0-2: Ball
+[%N]	1-2: Ball
+[%N]	2-2: <b>DOUBLE</b>  (Line Drive, 9LD, EV 96 MPH)
+[%N]	<a href="../players/player_23190.html">Spencer Torkelson</a> to third
+[%B]	Batting: SHB <a href="../players/player_28737.html">Francisco Lindor</a>
+[%N]	0-0:  Fly out, F9  (Flyball, 9LD, EV 97 MPH)
+[%N]	<b>Runner from 3rd tags up, SCORES, throw by RF</b>
+[%B]	Batting: RHB <a href="../players/player_38854.html">Dillon Dingler</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: Called Strike
+[%N]	1-2: Ball
+[%N]	2-2: Ball
+[%N]	3-2: Strikes out looking
+[%F]	Bottom of the 4th over - 1 run, 1 hit, 0 errors, 1 left on base; Baltimore 2 - Detroit 1
+[%T]	Top of the 5th - Baltimore Orioles batting - Pitching for Detroit Tigers : RHP <a href="../players/player_39323.html">Bryan Woo</a>
+[%B]	Batting: RHB <a href="../players/player_36584.html">Ceddanne Rafaela</a>
+[%N]	0-0: Foul Ball, location: 3F
+[%N]	0-1: Foul Ball, location: 2RF
+[%N]	0-2: Foul Ball, location: 3F
+[%N]	0-2: Foul Ball, location: 2F
+[%N]	0-2: <b>SINGLE</b>  (Groundball, 6MD, EV 110 MPH)
+[%B]	Batting: SHB <a href="../players/player_45910.html">Aron Estrada</a>
+[%N]	0-0: Foul Ball, location: 9LDF
+[%N]	0-1: Ground out 6-3 (Groundball, 4MS, EV 62 MPH)
+[%N]	<a href="../players/player_36584.html">Ceddanne Rafaela</a> to second
+[%B]	Batting: RHB <a href="../players/player_141414.html">Hyun-woo Kim</a>
+[%N]	0-0: <b>SINGLE</b>  (Flyball, 4D, EV 81 MPH)
+[%N]	<a href="../players/player_36584.html">Ceddanne Rafaela</a> to third
+[%N]	<b>Runner from 3rd tries for Home, SAFE, throw by RF to home</b>
+[%B]	Batting: LHB <a href="../players/player_43247.html">Jackson Holliday</a>
+[%N]	0-0: Foul Ball, location: 2F
+[%N]	0-1: Swinging Strike
+[%N]	0-2: Ball
+[%N]	1-2: Fielders Choice at 2nd, 3-6 (Groundball, 3S, EV 83 MPH)
+[%B]	Batting: SHB <a href="../players/player_44026.html">DJ Layton</a>
+[%N]	0-0: <b>SINGLE</b>  (Groundball, 6MD, EV 111 MPH)
+[%N]	<a href="../players/player_43247.html">Jackson Holliday</a> to second
+[%N]	Runner from 2nd tries for 3rd, SAFE, throw by CF made to third
+[%B]	Batting: LHB <a href="../players/player_45934.html">Thomas Sosa</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: Ball
+[%N]	2-1: Called Strike
+[%N]	2-2: Ball
+[%N]	3-2: <b>DOUBLE</b>  (Flyball, 78XD, EV 108 MPH)
+[%N]	<b><a href="../players/player_43247.html">Jackson Holliday</a> scores</b>
+[%N]	<a href="../players/player_44026.html">DJ Layton</a> to third
+[%N]	<b><a href="../players/player_44026.html">DJ Layton</a> scores</b>
+[%B]	Pitching: RHP <a href="../players/player_43022.html">Bryce Rainer</a>
+[%B]	Batting: SHB <a href="../players/player_45691.html">Leandro Arias</a>
+[%N]	0-0:  Fly out, F9  (Flyball, 89M, EV 90 MPH)
+[%F]	Top of the 5th over - 3 runs, 4 hits, 0 errors, 1 left on base; Baltimore 5 - Detroit 1
+[%T]	Bottom of the 5th - Detroit Tigers batting - Pitching for Baltimore Orioles : RHP <a href="../players/player_45447.html">Parker Hutyra</a>
+[%B]	Batting: LHB <a href="../players/player_24593.html">Enrique Bradfield Jr.</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Foul Ball, location: 25FF
+[%N]	0-2:  Fly out, F8  (Flyball, 8LM, EV 88 MPH)
+[%B]	Batting: SHB <a href="../players/player_39051.html">Adael Amador</a>
+[%N]	0-0: Ball
+[%N]	1-0: Ground out 1-3 (Groundball, 34S, EV 56 MPH)
+[%B]	Batting: LHB <a href="../players/player_41427.html">Max Clark</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: Called Strike
+[%N]	1-2:  Fly out, F8  (Line Drive, 8RD, EV 98 MPH)
+[%F]	Bottom of the 5th over - 0 runs, 0 hits, 0 errors, 0 left on base; Baltimore 5 - Detroit 1
+[%T]	Top of the 6th - Baltimore Orioles batting - Pitching for Detroit Tigers : RHP <a href="../players/player_43022.html">Bryce Rainer</a>
+[%B]	Batting: RHB <a href="../players/player_130337.html">Ronald Cardozo</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Called Strike
+[%N]	0-2: Ball
+[%N]	1-2: Ball
+[%N]	2-2: Ball
+[%N]	3-2: Base on Balls
+[%B]	Batting: RHB <a href="../players/player_129957.html">Jose Luis Acevedo</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: Swinging Strike
+[%N]	1-2: Ball
+[%N]	2-2:  Fly out, F7  (Flyball, 7D, EV 83 MPH)
+[%B]	Batting: RHB <a href="../players/player_36584.html">Ceddanne Rafaela</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Grounds into double play, 6-4-3 (Groundball, 56, EV 93 MPH)
+[%F]	Top of the 6th over - 0 runs, 0 hits, 0 errors, 0 left on base; Baltimore 5 - Detroit 1
+[%T]	Bottom of the 6th - Detroit Tigers batting - Pitching for Baltimore Orioles : RHP <a href="../players/player_45447.html">Parker Hutyra</a>
+[%B]	Batting: RHB <a href="../players/player_43437.html">Beau Ankeney</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: Swinging Strike
+[%N]	1-2: Ball
+[%N]	2-2: <b>SINGLE</b>  (Groundball, 4MD, EV 92 MPH)
+[%B]	Pitching: RHP <a href="../players/player_128786.html">Esteban Mejia</a>
+[%B]	Batting: RHB <a href="../players/player_44920.html">Nick Dumesnil</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Swinging Strike
+[%N]	0-2: Foul Ball, location: 23FF
+[%N]	0-2: Ball
+[%N]	1-2: Ball
+[%N]	2-2: Ball
+[%N]	3-2: <b>SINGLE</b>  (Groundball, 56D, EV 90 MPH)
+[%N]	<a href="../players/player_43437.html">Beau Ankeney</a> to second
+[%B]	Batting: RHB <a href="../players/player_23190.html">Spencer Torkelson</a>
+[%N]	0-0: Ball
+[%N]	1-0: Called Strike
+[%N]	1-1: Foul Ball, location: 2F
+[%N]	1-2: <b>SINGLE</b>  (Line Drive, 7S, EV 98 MPH)
+[%N]	<a href="../players/player_43437.html">Beau Ankeney</a> to third
+[%N]	<a href="../players/player_44920.html">Nick Dumesnil</a> to second
+[%B]	Batting: RHB <a href="../players/player_41389.html">Angel Cepeda</a>
+[%N]	0-0: Swinging Strike
+[%N]	0-1: Swinging Strike
+[%N]	0-2: Foul Ball, location: 9LMF
+[%N]	0-2: Ball
+[%N]	1-2: Ball
+[%N]	2-2: Grounds into fielders choice 6-2 (Groundball, 6S, EV 60 MPH)
+[%N]	<a href="../players/player_44920.html">Nick Dumesnil</a> to third
+[%N]	<a href="../players/player_23190.html">Spencer Torkelson</a> to second
+[%B]	Batting: SHB <a href="../players/player_28737.html">Francisco Lindor</a>
+[%N]	0-0: Foul Ball, location: 25FF
+[%N]	0-1: Ball
+[%N]	1-1: Ball
+[%N]	2-1:  Fly out, F9  (Flyball, 9LM, EV 73 MPH)
+[%B]	Batting: RHB <a href="../players/player_38854.html">Dillon Dingler</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Swinging Strike
+[%N]	0-2: Ball
+[%N]	1-2: Ball
+[%N]	2-2: Ball
+[%N]	3-2:  Fly out, F2  (Popup, 15S, EV 52 MPH)
+[%F]	Bottom of the 6th over - 0 runs, 3 hits, 0 errors, 3 left on base; Baltimore 5 - Detroit 1
+[%T]	Top of the 7th - Baltimore Orioles batting - Pitching for Detroit Tigers : RHP <a href="../players/player_43022.html">Bryce Rainer</a>
+[%B]	Batting: SHB <a href="../players/player_45910.html">Aron Estrada</a>
+[%N]	0-0: Foul Ball, location: 5FF
+[%N]	0-1: Ball
+[%N]	1-1: Ball
+[%N]	2-1: <b>SINGLE</b>  (Line Drive, 7LS, EV 86 MPH)
+[%B]	Batting: RHB <a href="../players/player_141414.html">Hyun-woo Kim</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Swinging Strike
+[%N]	0-2: Foul Ball, location: 2F
+[%N]	0-2:  Fly out, F3  (Popup, 23F, EV 42 MPH)
+[%B]	Batting: LHB <a href="../players/player_43247.html">Jackson Holliday</a>
+[%N]	0-0: Called Strike
+[%N]	0-1:  Fly out, F8  (Flyball, 8LM, EV 94 MPH)
+[%B]	Batting: SHB <a href="../players/player_44026.html">DJ Layton</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: <b>SINGLE</b>  (Line Drive, 7S, EV 93 MPH)
+[%N]	<a href="../players/player_45910.html">Aron Estrada</a> to second
+[%B]	Batting: LHB <a href="../players/player_45934.html">Thomas Sosa</a>
+[%N]	0-0: Ball
+[%N]	1-0: Called Strike
+[%N]	1-1: Ground out 4-3 (Groundball, 4S, EV 61 MPH)
+[%F]	Top of the 7th over - 0 runs, 2 hits, 0 errors, 2 left on base; Baltimore 5 - Detroit 1
+[%T]	Bottom of the 7th - Detroit Tigers batting - Pitching for Baltimore Orioles : RHP <a href="../players/player_128786.html">Esteban Mejia</a>
+[%B]	Batting: LHB <a href="../players/player_24593.html">Enrique Bradfield Jr.</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Foul Ball, location: 2F
+[%N]	0-2: Foul Ball, location: 5F
+[%N]	0-2: Ball
+[%N]	1-2: Ball
+[%N]	2-2: Foul Ball, location: 5SF
+[%N]	2-2: Ball
+[%N]	3-2: Base on Balls
+[%B]	Batting: SHB <a href="../players/player_39051.html">Adael Amador</a>
+[%N]	0-0: Ball
+[%N]	1-0: Ball
+[%N]	<a href="../players/player_24593.html">Enrique Bradfield Jr.</a> steals 2nd base
+[%N]	2-0: Ball
+[%N]	3-0: Called Strike
+[%N]	3-1: <b>SINGLE</b>  (Line Drive, 7LM, EV 93 MPH)
+[%N]	<a href="../players/player_24593.html">Enrique Bradfield Jr.</a> to third
+[%B]	Pitching: LHP <a href="../players/player_46248.html">Luis De Leon</a>
+[%B]	Batting: LHB <a href="../players/player_41427.html">Max Clark</a>
+[%N]	0-0: Ball
+[%N]	1-0: Called Strike
+[%N]	1-1: Foul Ball, location: 2F
+[%N]	1-2: Ball
+[%N]	2-2: Ball
+[%N]	3-2: <b>SINGLE</b>  (Groundball, 4MD, EV 113 MPH)
+[%N]	<b><a href="../players/player_24593.html">Enrique Bradfield Jr.</a> scores</b>
+[%N]	<a href="../players/player_39051.html">Adael Amador</a> to second
+[%B]	Batting: RHB <a href="../players/player_43437.html">Beau Ankeney</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Swinging Strike
+[%N]	0-2: Ball
+[%N]	1-2: Ball
+[%N]	2-2: Foul Ball, location: 2F
+[%N]	2-2: Ball
+[%N]	3-2: <b>SINGLE</b>  (Line Drive, 89M, EV 85 MPH)
+[%N]	<a href="../players/player_39051.html">Adael Amador</a> to third
+[%N]	<a href="../players/player_41427.html">Max Clark</a> to second
+[%B]	Batting: RHB <a href="../players/player_44920.html">Nick Dumesnil</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Foul Ball, location: 7LMF
+[%N]	0-2: Ball
+[%N]	1-2: Strikes out swinging
+[%B]	Pitching: RHP <a href="../players/player_22850.html">Will Vest</a>
+[%B]	Batting: RHB <a href="../players/player_23190.html">Spencer Torkelson</a>
+[%N]	0-0: <b>SINGLE</b>  (Line Drive, 8LM, EV 79 MPH)
+[%N]	<b><a href="../players/player_39051.html">Adael Amador</a> scores</b>
+[%N]	<a href="../players/player_41427.html">Max Clark</a> to third
+[%N]	<a href="../players/player_43437.html">Beau Ankeney</a> to second
+[%N]	<b>Runner from 3rd tries for Home, SAFE, throw by CF to home</b>
+[%B]	Batting: RHB <a href="../players/player_41389.html">Angel Cepeda</a>
+[%N]	0-0: Ball
+[%N]	1-0: Foul Ball, location: 9LDF
+[%N]	1-1: Foul Ball, location: 2F
+[%N]	1-2: Strikes out swinging
+[%B]	Batting: SHB <a href="../players/player_28737.html">Francisco Lindor</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: Foul Ball, location: 9LMFF
+[%N]	1-2: Foul Ball, location: 2F
+[%N]	1-2: Foul Ball, location: 2F
+[%N]	1-2: Ball
+[%N]	2-2: Ball
+[%N]	3-2: Ground out 4-3 (Groundball, 4S, EV 85 MPH)
+[%F]	Bottom of the 7th over - 3 runs, 4 hits, 0 errors, 2 left on base; Baltimore 5 - Detroit 4
+[%T]	Top of the 8th - Baltimore Orioles batting - Pitching for Detroit Tigers : RHP <a href="../players/player_43022.html">Bryce Rainer</a>
+[%B]	Batting: SHB <a href="../players/player_45691.html">Leandro Arias</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Called Strike
+[%N]	0-2: Foul Ball, location: 2LF
+[%N]	0-2: Ground out 4-3 (Groundball, 4M, EV 93 MPH)
+[%B]	Batting: RHB <a href="../players/player_130337.html">Ronald Cardozo</a>
+[%N]	0-0: Ground out 5-3 (Groundball, 5S, EV 59 MPH)
+[%B]	Batting: RHB <a href="../players/player_129957.html">Jose Luis Acevedo</a>
+[%N]	0-0: Ball
+[%N]	1-0: Foul Ball, location: 9LMF
+[%N]	1-1: Called Strike
+[%N]	1-2: Ball
+[%N]	2-2: Ball
+[%N]	3-2: Ground out 6-3 (Groundball, 6, EV 68 MPH)
+[%F]	Top of the 8th over - 0 runs, 0 hits, 0 errors, 0 left on base; Baltimore 5 - Detroit 4
+[%T]	Bottom of the 8th - Detroit Tigers batting - Pitching for Baltimore Orioles : RHP <a href="../players/player_22850.html">Will Vest</a>
+[%B]	Pitching: LHP <a href="../players/player_43956.html">Micah Ashman</a>
+[%B]	Batting: RHB <a href="../players/player_38854.html">Dillon Dingler</a>
+[%N]	0-0: Ball
+[%N]	1-0: <b>SINGLE</b>  (Line Drive, 8LS, EV 94 MPH)
+[%B]	Pinch Hitting: RHB <a href="../players/player_128309.html">Yovanny Rodriguez</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: Foul Ball, location: 2F
+[%N]	1-2: Foul Ball, location: 2F
+[%N]	1-2:  Fly out, F7  (Flyball, 78D, EV 92 MPH)
+[%B]	Batting: SHB <a href="../players/player_39051.html">Adael Amador</a>
+[%N]	0-0: Foul Ball, location: 7LDF
+[%N]	0-1: Ball
+[%N]	1-1: Ball
+[%N]	2-1: Ground out 3-1 (Groundball, 34S, EV 54 MPH)
+[%N]	<a href="../players/player_38854.html">Dillon Dingler</a> to second
+[%B]	Batting: LHB <a href="../players/player_41427.html">Max Clark</a>
+[%N]	0-0: Ball
+[%N]	1-0: Ball
+[%N]	2-0: Swinging Strike
+[%N]	2-1: Ball
+[%N]	3-1: Called Strike
+[%N]	3-2: Strikes out looking
+[%F]	Bottom of the 8th over - 0 runs, 1 hit, 0 errors, 1 left on base; Baltimore 5 - Detroit 4
+[%T]	Top of the 9th - Baltimore Orioles batting - Pitching for Detroit Tigers : RHP <a href="../players/player_43022.html">Bryce Rainer</a>
+[%B]	Pitching: RHP <a href="../players/player_136739.html">Marquis Wright</a>
+[%B]	Now in RF: <a href="../players/player_34867.html">Jo Adell</a>
+[%B]	Batting: RHB <a href="../players/player_36584.html">Ceddanne Rafaela</a>
+[%N]	0-0: Ball
+[%N]	1-0: Ball
+[%N]	2-0:  <b>SOLO HOME RUN</b>  (Flyball, 7LD, EV 104 MPH), Distance : 358 ft
+[%B]	Batting: SHB <a href="../players/player_45910.html">Aron Estrada</a>
+[%N]	0-0: Called Strike
+[%N]	0-1:  Fly out, F9  (Flyball, 9, EV 84 MPH)
+[%B]	Batting: RHB <a href="../players/player_141414.html">Hyun-woo Kim</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: <b>DOUBLE</b>  (Groundball, 5L, EV 111 MPH)
+[%B]	Batting: LHB <a href="../players/player_43247.html">Jackson Holliday</a>
+[%N]	0-0: Intentional Walk
+[%B]	Batting: SHB <a href="../players/player_44026.html">DJ Layton</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: Foul Ball, location: 7LDF
+[%N]	1-2: Foul Ball, location: 2F
+[%N]	1-2: Ball
+[%N]	2-2: Ball
+[%N]	3-2: Fielders Choice at 2nd, 1-6 (Groundball, 13S, EV 61 MPH)
+[%N]	<a href="../players/player_141414.html">Hyun-woo Kim</a> to third
+[%B]	Batting: LHB <a href="../players/player_45934.html">Thomas Sosa</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Foul Ball, location: 7LDF
+[%N]	0-2: Foul Ball, location: 5FF
+[%N]	0-2: Ball
+[%N]	1-2: Ball
+[%N]	2-2: Ball
+[%N]	3-2: Base on Balls
+[%N]	<a href="../players/player_44026.html">DJ Layton</a> to second
+[%B]	Batting: SHB <a href="../players/player_45691.html">Leandro Arias</a>
+[%N]	0-0: Ball
+[%N]	1-0: Ball
+[%N]	2-0: Called Strike
+[%N]	2-1: Ball
+[%N]	3-1: Base on Balls
+[%N]	<b><a href="../players/player_141414.html">Hyun-woo Kim</a> scores</b>
+[%N]	<a href="../players/player_44026.html">DJ Layton</a> to third
+[%N]	<a href="../players/player_45934.html">Thomas Sosa</a> to second
+[%B]	Batting: RHB <a href="../players/player_130337.html">Ronald Cardozo</a>
+[%N]	0-0: Ball
+[%N]	1-0: Ball
+[%N]	2-0: Ball
+[%N]	3-0: Called Strike
+[%N]	3-1: Foul Ball, location: 2F
+[%N]	3-2: Ground out 1-3 (Groundball, 15S, EV 63 MPH)
+[%F]	Top of the 9th over - 2 runs, 2 hits, 0 errors, 3 left on base; Baltimore 7 - Detroit 4
+[%T]	Bottom of the 9th - Detroit Tigers batting - Pitching for Baltimore Orioles : LHP <a href="../players/player_43956.html">Micah Ashman</a>
+[%B]	Pitching: RHP <a href="../players/player_22891.html">Cody Laweryson</a>
+[%B]	Batting: RHB <a href="../players/player_43437.html">Beau Ankeney</a>
+[%N]	0-0: Called Strike
+[%N]	0-1: Ball
+[%N]	1-1: Swinging Strike
+[%N]	1-2: Strikes out swinging
+[%B]	Batting: RHB <a href="../players/player_44920.html">Nick Dumesnil</a>
+[%N]	0-0:  Fly out, F8  (Flyball, 78D, EV 98 MPH)
+[%B]	Batting: RHB <a href="../players/player_23190.html">Spencer Torkelson</a>
+[%N]	0-0: Ball
+[%N]	1-0: Ball
+[%N]	2-0: Foul Ball, location: 9LDF
+[%N]	2-1: Called Strike
+[%N]	2-2: Foul Ball, location: 7LMF
+[%N]	2-2:  Fly out, F5  (Popup, 5SF, EV 58 MPH)
+[%F]	Bottom of the 9th over - 0 runs, 0 hits, 0 errors, 0 left on base; Baltimore 7 - Detroit 4
