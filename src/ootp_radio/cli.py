@@ -11,7 +11,6 @@ from pathlib import Path
 from ootp_radio.box_score_parser import (
     BoxScoreError,
     discover_same_slate_results,
-    format_score_sentence,
 )
 from ootp_radio.config import load_config
 from ootp_radio.game_detector import (
@@ -20,7 +19,7 @@ from ootp_radio.game_detector import (
     ensure_game_files_stable,
 )
 from ootp_radio.live_recap import prepare_latest_recap
-from ootp_radio.narration import format_recap_narration
+from ootp_radio.narration import format_recap_narration, format_score_sentence
 from ootp_radio.paths import SaveDirectoryError, validate_save_dir
 from ootp_radio.recap_parser import RecapParseError, parse_recap_file
 from ootp_radio.speech import MacSaySpeaker, SpeechError
@@ -140,9 +139,13 @@ def _recap_latest(
     voice: str | None,
     rate: int | None,
     dry_run: bool,
+    around_league: bool,
 ) -> int:
     config = load_config(save_dir=save_dir)
-    prepared_recap = prepare_latest_recap(config.save_dir)
+    prepared_recap = prepare_latest_recap(
+        config.save_dir,
+        include_around_league=around_league,
+    )
     return _deliver_narration(
         prepared_recap.narration_text,
         voice=voice,
@@ -157,6 +160,7 @@ def _watch_latest(
     state_file: Path,
     poll_interval: float,
     play_current: bool,
+    around_league: bool,
     voice: str | None,
     rate: int | None,
 ) -> int:
@@ -168,6 +172,7 @@ def _watch_latest(
         speaker=MacSaySpeaker(voice=voice, rate=rate),
         poll_interval_seconds=poll_interval,
         play_current=play_current,
+        include_around_league=around_league,
     )
     try:
         watcher.run()
@@ -250,6 +255,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="path to the selected .lg saved-league directory",
     )
     _add_speech_arguments(recap_latest_parser)
+    recap_latest_parser.add_argument(
+        "--around-league",
+        action="store_true",
+        help="speak other MLB results after the recap",
+    )
 
     watch_parser = subparsers.add_parser(
         "watch",
@@ -277,6 +287,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--play-current",
         action="store_true",
         help="speak the current latest game when the watcher starts",
+    )
+    watch_parser.add_argument(
+        "--around-league",
+        action="store_true",
+        help="speak other MLB results after each recap",
     )
     watch_parser.add_argument(
         "--voice",
@@ -331,6 +346,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 voice=args.voice,
                 rate=args.rate,
                 dry_run=args.dry_run,
+                around_league=args.around_league,
             )
         if args.command == "watch":
             return _watch_latest(
@@ -338,6 +354,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 state_file=args.state_file,
                 poll_interval=args.poll_interval,
                 play_current=args.play_current,
+                around_league=args.around_league,
                 voice=args.voice,
                 rate=args.rate,
             )

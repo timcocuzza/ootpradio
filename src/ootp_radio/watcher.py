@@ -9,6 +9,7 @@ from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
+from ootp_radio.box_score_parser import BoxScoreError
 from ootp_radio.game_detector import (
     GameDetectionError,
     GameNotReadyError,
@@ -16,7 +17,7 @@ from ootp_radio.game_detector import (
     detect_latest_game,
     ensure_game_files_stable,
 )
-from ootp_radio.live_recap import prepare_game_recap
+from ootp_radio.live_recap import add_around_league, prepare_game_recap
 from ootp_radio.paths import require_valid_save_dir
 from ootp_radio.recap_parser import RecapParseError
 from ootp_radio.speech import MacSaySpeaker, SpeechError
@@ -40,6 +41,7 @@ class RecapWatcher:
         speaker: MacSaySpeaker,
         poll_interval_seconds: float = 2.0,
         play_current: bool = False,
+        include_around_league: bool = False,
         sleep: Callable[[float], None] = time.sleep,
         now: Callable[[], datetime] = _utc_now,
     ) -> None:
@@ -51,6 +53,7 @@ class RecapWatcher:
         self.speaker = speaker
         self.poll_interval_seconds = poll_interval_seconds
         self.play_current = play_current
+        self.include_around_league = include_around_league
         self.sleep = sleep
         self.now = now
 
@@ -116,7 +119,24 @@ class RecapWatcher:
             )
             return state, False
 
-        _LOGGER.info("speech_started game_id=%s mode=recap", game_files.game_id)
+        if self.include_around_league:
+            try:
+                prepared = add_around_league(prepared, sleep=self.sleep)
+            except BoxScoreError as error:
+                _LOGGER.error(
+                    'around_league_failed game_id=%s reason="%s"',
+                    game_files.game_id,
+                    error,
+                )
+
+        speech_mode = (
+            "recap_around_league"
+            if prepared.around_league_results
+            else "recap"
+        )
+        _LOGGER.info(
+            "speech_started game_id=%s mode=%s", game_files.game_id, speech_mode
+        )
         try:
             self.speaker.speak(prepared.narration_text)
         except SpeechError as error:
@@ -171,4 +191,3 @@ class RecapWatcher:
             if max_polls is not None and poll_count >= max_polls:
                 return
             self.sleep(self.poll_interval_seconds)
-

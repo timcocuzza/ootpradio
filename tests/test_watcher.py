@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
+from ootp_radio.box_score_parser import ScoreSlateNotReadyError
+from ootp_radio.models import GameResult
 from ootp_radio.speech import SpeechError
 from ootp_radio.state import StateError, load_state
 from ootp_radio.watcher import RecapWatcher
@@ -172,3 +175,55 @@ def test_state_file_inside_save_is_rejected(tmp_path: Path) -> None:
     with pytest.raises(StateError, match="must be outside the OOTP save"):
         watcher.run(max_polls=1)
 
+
+def test_watcher_can_speak_other_scores_after_recap(tmp_path: Path) -> None:
+    save_dir = _create_save_dir(tmp_path)
+    _add_game(save_dir, 1596)
+    state_file = tmp_path / "var" / "state.json"
+    speaker = RecordingSpeaker()
+    results = [
+        GameResult(1596, None, "Baltimore Orioles", 7, "Detroit Tigers", 4),
+        GameResult(1600, None, "Seattle Mariners", 10, "Texas Rangers", 3),
+    ]
+
+    with patch(
+        "ootp_radio.live_recap.discover_same_slate_results", return_value=results
+    ):
+        _watcher(
+            save_dir,
+            state_file,
+            speaker,
+            play_current=True,
+            include_around_league=True,
+        ).run(max_polls=1)
+
+    assert len(speaker.narrations) == 1
+    assert "Now, around the league." in speaker.narrations[0]
+    assert "The Seattle Mariners defeated the Texas Rangers" in speaker.narrations[0]
+    assert "The Baltimore Orioles defeated the Detroit Tigers" not in speaker.narrations[0]
+
+
+def test_score_failure_falls_back_to_recap_and_marks_processed(
+    tmp_path: Path, caplog
+) -> None:
+    save_dir = _create_save_dir(tmp_path)
+    _add_game(save_dir, 1596)
+    state_file = tmp_path / "var" / "state.json"
+    speaker = RecordingSpeaker()
+
+    with patch(
+        "ootp_radio.watcher.add_around_league",
+        side_effect=ScoreSlateNotReadyError("scores still changing"),
+    ):
+        _watcher(
+            save_dir,
+            state_file,
+            speaker,
+            play_current=True,
+            include_around_league=True,
+        ).run(max_polls=1)
+
+    assert len(speaker.narrations) == 1
+    assert "Now, around the league." not in speaker.narrations[0]
+    assert load_state(state_file).last_processed_game_id == 1596
+    assert "around_league_failed" in caplog.text

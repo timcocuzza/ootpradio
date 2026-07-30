@@ -7,6 +7,7 @@ import pytest
 
 from ootp_radio.game_detector import GameNotReadyError
 from ootp_radio.live_recap import prepare_latest_recap
+from ootp_radio.models import GameResult
 from ootp_radio.paths import SaveDirectoryError
 
 FIXTURE_PATH = (
@@ -63,3 +64,43 @@ def test_changing_box_score_is_not_parsed(tmp_path: Path) -> None:
 
     parse.assert_not_called()
 
+
+def test_can_append_other_same_slate_results(tmp_path: Path) -> None:
+    save_dir, _ = _create_live_save(tmp_path)
+    results = [
+        GameResult(1596, "08/01/2032", "Baltimore Orioles", 7, "Detroit Tigers", 4),
+        GameResult(1600, "08/01/2032", "Seattle Mariners", 10, "Texas Rangers", 3),
+    ]
+
+    with patch(
+        "ootp_radio.live_recap.discover_same_slate_results", return_value=results
+    ):
+        prepared = prepare_latest_recap(
+            save_dir,
+            include_around_league=True,
+            sleep=lambda _: None,
+        )
+
+    assert [result.game_id for result in prepared.around_league_results] == [1600]
+    assert "Now, around the league." in prepared.narration_text
+    assert "The Seattle Mariners defeated the Texas Rangers" in prepared.narration_text
+    assert "The Baltimore Orioles defeated the Detroit Tigers" not in prepared.narration_text
+
+
+def test_around_league_with_only_played_game_adds_no_segment(tmp_path: Path) -> None:
+    save_dir, _ = _create_live_save(tmp_path)
+    results = [
+        GameResult(1596, "08/01/2032", "Baltimore Orioles", 7, "Detroit Tigers", 4)
+    ]
+
+    with patch(
+        "ootp_radio.live_recap.discover_same_slate_results", return_value=results
+    ):
+        prepared = prepare_latest_recap(
+            save_dir,
+            include_around_league=True,
+            sleep=lambda _: None,
+        )
+
+    assert prepared.around_league_results == ()
+    assert "Now, around the league." not in prepared.narration_text

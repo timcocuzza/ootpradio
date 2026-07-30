@@ -275,19 +275,3 @@ def discover_same_slate_results(
             results_by_id[result.game_id] = result
 
     return [results_by_id[game_id] for game_id in sorted(results_by_id)]
-
-
-def format_score_sentence(result: GameResult) -> str:
-    """Create one neutral deterministic score sentence."""
-    if result.away_score == result.home_score:
-        return (
-            f"{result.away_team} and {result.home_team} finished tied, "
-            f"{result.away_score} to {result.home_score}."
-        )
-    if result.away_score > result.home_score:
-        winner, winner_score = result.away_team, result.away_score
-        loser, loser_score = result.home_team, result.home_score
-    else:
-        winner, winner_score = result.home_team, result.home_score
-        loser, loser_score = result.away_team, result.away_score
-    return f"{winner} defeated {loser}, {winner_score} to {loser_score}."

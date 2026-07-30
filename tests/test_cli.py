@@ -33,6 +33,7 @@ def test_speak_recap_dry_run_prints_narration_without_speaking(capsys) -> None:
     )
     assert "DJ Layton" in output
     assert "<a href=" not in output
+    assert "Now, around the league" not in output
 
 
 def test_doctor_prints_expected_live_save_checks(tmp_path: Path, capsys) -> None:
@@ -115,6 +116,37 @@ def test_recap_latest_sends_live_narration_to_speaker(tmp_path: Path) -> None:
     assert "DJ Layton" in narration
 
 
+def test_recap_latest_can_append_other_scores_without_repeating_own_game(
+    tmp_path: Path, capsys
+) -> None:
+    save_dir = _create_live_recap_save(tmp_path)
+    results = [
+        GameResult(1596, "08/01/2032", "Baltimore Orioles", 7, "Detroit Tigers", 4),
+        GameResult(1600, "08/01/2032", "Seattle Mariners", 10, "Texas Rangers", 3),
+    ]
+
+    with patch("ootp_radio.live_recap.ensure_game_files_stable"):
+        with patch(
+            "ootp_radio.live_recap.discover_same_slate_results",
+            return_value=results,
+        ):
+            result = main(
+                [
+                    "recap-latest",
+                    "--save-dir",
+                    str(save_dir),
+                    "--around-league",
+                    "--dry-run",
+                ]
+            )
+
+    output = capsys.readouterr().out
+    assert result == 0
+    assert "Now, around the league." in output
+    assert "The Seattle Mariners defeated the Texas Rangers, 10 to 3." in output
+    assert "The Baltimore Orioles defeated the Detroit Tigers" not in output
+
+
 def test_watch_stops_cleanly_on_keyboard_interrupt(tmp_path: Path, capsys) -> None:
     save_dir = tmp_path / "League.lg"
 
@@ -154,5 +186,5 @@ def test_scores_latest_prints_count_and_deterministic_sentences(
     output = capsys.readouterr().out
     assert result == 0
     assert output.startswith("2 games found")
-    assert "Seattle defeated Texas, 10 to 3." in output
-    assert "Philadelphia defeated Miami, 12 to 0." in output
+    assert "The Seattle defeated the Texas, 10 to 3." in output
+    assert "The Philadelphia defeated the Miami, 12 to 0." in output

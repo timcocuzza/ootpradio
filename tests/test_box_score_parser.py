@@ -10,11 +10,11 @@ from ootp_radio.box_score_parser import (
     NotMajorLeagueBoxScoreError,
     ScoreSlateNotReadyError,
     discover_same_slate_results,
-    format_score_sentence,
     parse_box_score_file,
     parse_box_score_html,
 )
 from ootp_radio.models import GameFiles, GameResult
+from ootp_radio.narration import format_score_sentence
 
 FIXTURE_PATH = (
     Path(__file__).parent / "fixtures" / "game_1596" / "game_box_1596.html"
@@ -122,11 +122,11 @@ def test_mismatched_document_and_filename_game_ids_are_rejected() -> None:
     [
         (
             GameResult(1, None, "Seattle", 10, "Texas", 3),
-            "Seattle defeated Texas, 10 to 3.",
+            "The Seattle defeated the Texas, 10 to 3.",
         ),
         (
             GameResult(2, None, "Miami", 0, "Philadelphia", 12),
-            "Philadelphia defeated Miami, 12 to 0.",
+            "The Philadelphia defeated the Miami, 12 to 0.",
         ),
     ],
 )

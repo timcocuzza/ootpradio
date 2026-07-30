@@ -1,8 +1,7 @@
 # OOTP 27 Radio Companion
 
-This repository currently contains Milestone 7: the automatic recap watcher
-plus deterministic parsing and printed preview of same-slate MLB scores. Score
-previews are not connected to speech yet.
+This repository currently contains Milestone 8: the automatic recap watcher
+plus optional narration of same-slate MLB scores after the played-game recap.
 
 ## Requirements
 
@@ -27,7 +26,7 @@ pytest -q
 Expected result:
 
 ```text
-60 passed
+68 passed
 ```
 
 ## Preview the narration
@@ -51,20 +50,20 @@ python3 -m ootp_radio.cli recap-latest \
   --dry-run
 ```
 
-## Manual Milestone 7 test
+## Manual Milestone 8 test
 
 With the environment active, run:
 
 ```bash
-python3 -m ootp_radio.cli scores-latest \
-  --save-dir "/Users/timcocuzza/Application Support/Out of the Park Developments/OOTP Baseball 27/saved_games/first os.lg"
+python3 -m ootp_radio.cli recap-latest \
+  --save-dir "/Users/timcocuzza/Application Support/Out of the Park Developments/OOTP Baseball 27/saved_games/first os.lg" \
+  --around-league
 ```
 
-For the current August 3 slate, the command should report `15 games found` and
-print one deterministic sentence per MLB result, including Baltimore's latest
-game. It should not include minor-league games or produce audio.
+The played Orioles recap should be spoken first. After a short paragraph pause,
+the Mac should say `Now, around the league` and narrate the other 14 MLB games.
+The Orioles result must not be repeated in the score segment. Score sentences
+use articles, such as `The Seattle Mariners defeated the Los Angeles Dodgers`.
 
-Discovery uses the played replay's modification time, includes box scores
-within five seconds, and requires the same MLB game date. IDs do not need to be
-contiguous. All candidate files must remain unchanged across two metadata polls
-before they are parsed.
+Recap-only remains the default. Add `--around-league` to either `recap-latest`
+or `watch` to enable the optional score segment.
