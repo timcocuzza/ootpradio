@@ -16,6 +16,10 @@ class CheckStatus(str, Enum):
     FAIL = "FAIL"
 
 
+class SaveDirectoryError(RuntimeError):
+    """Raised when a command cannot use the selected save directory."""
+
+
 @dataclass(frozen=True)
 class PathCheck:
     """Result of checking one expected path."""
@@ -146,3 +150,19 @@ def validate_save_dir(save_dir: Path | str) -> DoctorReport:
         )
 
     return DoctorReport(checks=tuple(checks))
+
+
+def require_valid_save_dir(save_dir: Path | str) -> None:
+    """Raise a concise error when required save-directory checks fail."""
+    report = validate_save_dir(save_dir)
+    failures = [
+        check.message
+        for check in report.checks
+        if check.status is CheckStatus.FAIL
+    ]
+    if failures:
+        detail = "; ".join(failures)
+        raise SaveDirectoryError(
+            f"The selected save directory is not ready: {detail}. "
+            "Run the doctor command for a complete path report."
+        )

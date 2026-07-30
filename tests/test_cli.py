@@ -10,6 +10,16 @@ FIXTURE_PATH = (
 )
 
 
+def _create_live_recap_save(tmp_path: Path) -> Path:
+    save_dir = tmp_path / "Live League With Spaces.lg"
+    (save_dir / "replays").mkdir(parents=True)
+    box_scores_dir = save_dir / "news" / "html" / "box_scores"
+    box_scores_dir.mkdir(parents=True)
+    (save_dir / "replays" / "replay_1596.rpl").write_bytes(b"replay")
+    (box_scores_dir / "game_box_1596.html").write_bytes(FIXTURE_PATH.read_bytes())
+    return save_dir
+
+
 def test_speak_recap_dry_run_prints_narration_without_speaking(capsys) -> None:
     with patch("ootp_radio.cli.MacSaySpeaker.speak") as speak:
         result = main(["speak-recap", str(FIXTURE_PATH), "--dry-run"])
@@ -66,3 +76,39 @@ def test_latest_game_prints_matching_files(tmp_path: Path, capsys) -> None:
     assert "Replay: replay_1596.rpl" in output
     assert "Game log: log_1596.txt" in output
     assert "Highlight: highlight_1596.rpl" in output
+
+
+def test_recap_latest_dry_run_prints_live_narration_without_speaking(
+    tmp_path: Path, capsys
+) -> None:
+    save_dir = _create_live_recap_save(tmp_path)
+
+    with patch("ootp_radio.live_recap.ensure_game_files_stable"):
+        with patch("ootp_radio.cli.MacSaySpeaker.speak") as speak:
+            result = main(
+                ["recap-latest", "--save-dir", str(save_dir), "--dry-run"]
+            )
+
+    output = capsys.readouterr().out
+    speak.assert_not_called()
+    assert result == 0
+    assert output.startswith(
+        "This is WBAL News Radio. Your Baltimore Orioles postgame report."
+    )
+    assert "Baltimore Gets 7-4 Win" in output
+    assert "DJ Layton" in output
+
+
+def test_recap_latest_sends_live_narration_to_speaker(tmp_path: Path) -> None:
+    save_dir = _create_live_recap_save(tmp_path)
+
+    with patch("ootp_radio.live_recap.ensure_game_files_stable"):
+        with patch("ootp_radio.cli.MacSaySpeaker.speak") as speak:
+            result = main(["recap-latest", "--save-dir", str(save_dir)])
+
+    assert result == 0
+    narration = speak.call_args.args[0]
+    assert narration.startswith(
+        "This is WBAL News Radio. Your Baltimore Orioles postgame report."
+    )
+    assert "DJ Layton" in narration

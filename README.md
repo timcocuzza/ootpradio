@@ -1,8 +1,9 @@
 # OOTP 27 Radio Companion
 
-This repository currently contains Milestone 4: static recap parsing and
-speech, read-only save validation, and detection of the latest played game from
-its numeric replay file. It does not speak a live game yet.
+This repository currently contains Milestone 5: an on-demand pipeline that
+validates a live save, detects and stabilizes its latest played game, parses the
+official OOTP recap, adds the mapped station introduction, and speaks it using
+macOS text-to-speech.
 
 ## Requirements
 
@@ -27,7 +28,7 @@ pytest -q
 Expected result:
 
 ```text
-32 passed
+37 passed
 ```
 
 ## Preview the narration
@@ -41,27 +42,31 @@ python3 -m ootp_radio.cli speak-recap tests/fixtures/game_1596/game_box_1596.htm
 The narration begins with WBAL News Radio because the recap mentions the
 Baltimore Orioles. Baltimore is currently the only team-to-station mapping.
 
-## Manual Milestone 4 test
+## Preview the latest live recap
+
+To print the narration without producing audio, add `--dry-run`:
+
+```bash
+python3 -m ootp_radio.cli recap-latest \
+  --save-dir "/Users/timcocuzza/Application Support/Out of the Park Developments/OOTP Baseball 27/saved_games/first os.lg" \
+  --dry-run
+```
+
+## Manual Milestone 5 test
 
 With the environment active, run:
 
 ```bash
-python3 -m ootp_radio.cli latest-game \
+python3 -m ootp_radio.cli recap-latest \
   --save-dir "/Users/timcocuzza/Application Support/Out of the Park Developments/OOTP Baseball 27/saved_games/first os.lg"
 ```
 
-For the current save snapshot, the command should report:
+The Mac should read the newest completed played-game recap, beginning with:
 
 ```text
-Game ID: 1596
-Box score: game_box_1596.html
-Replay: replay_1596.rpl
-Game log: log_1596.txt
-Highlight: highlight_1596.rpl
+This is WBAL News Radio. Your Baltimore Orioles postgame report.
 ```
 
-Detection is anchored to the newest numeric `replay_<GAME_ID>.rpl`, not the
-newest box score. The replay and required matching box score must retain the
-same size and modification time across two polls before the command reports
-them ready. Game-log and highlight files remain optional. This milestone does
-not parse or speak the detected live game.
+The command deliberately allows the same latest game to be replayed whenever
+it is run. Automatic watching and duplicate prevention remain out of scope
+until Milestone 6.

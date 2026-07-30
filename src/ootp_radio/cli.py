@@ -13,8 +13,9 @@ from ootp_radio.game_detector import (
     detect_latest_game,
     ensure_game_files_stable,
 )
+from ootp_radio.live_recap import prepare_latest_recap
 from ootp_radio.narration import format_recap_narration
-from ootp_radio.paths import validate_save_dir
+from ootp_radio.paths import SaveDirectoryError, validate_save_dir
 from ootp_radio.recap_parser import RecapParseError, parse_recap_file
 from ootp_radio.speech import MacSaySpeaker, SpeechError
 
@@ -37,6 +38,21 @@ def _speak_recap(
     recap = parse_recap_file(box_score)
     narration = format_recap_narration(recap)
 
+    return _deliver_narration(
+        narration,
+        voice=voice,
+        rate=rate,
+        dry_run=dry_run,
+    )
+
+
+def _deliver_narration(
+    narration: str,
+    *,
+    voice: str | None,
+    rate: int | None,
+    dry_run: bool,
+) -> int:
     if dry_run:
         print(narration)
         return 0
@@ -50,6 +66,23 @@ def _positive_integer(value: str) -> int:
     if parsed_value <= 0:
         raise argparse.ArgumentTypeError("must be greater than zero")
     return parsed_value
+
+
+def _add_speech_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--voice",
+        help="override the voice configured in macOS",
+    )
+    parser.add_argument(
+        "--rate",
+        type=_positive_integer,
+        help="override the configured speech rate in words per minute",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="print the final narration without speaking",
+    )
 
 
 def _run_doctor(save_dir: Path) -> int:
@@ -86,6 +119,23 @@ def _print_latest_game(save_dir: Path) -> int:
     return 0
 
 
+def _recap_latest(
+    save_dir: Path,
+    *,
+    voice: str | None,
+    rate: int | None,
+    dry_run: bool,
+) -> int:
+    config = load_config(save_dir=save_dir)
+    prepared_recap = prepare_latest_recap(config.save_dir)
+    return _deliver_narration(
+        prepared_recap.narration_text,
+        voice=voice,
+        rate=rate,
+        dry_run=dry_run,
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the command-line parser."""
     parser = argparse.ArgumentParser(
@@ -113,20 +163,7 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         help="path to a game_box_<GAME_ID>.html file",
     )
-    speak_recap_parser.add_argument(
-        "--voice",
-        help="override the voice configured in macOS",
-    )
-    speak_recap_parser.add_argument(
-        "--rate",
-        type=_positive_integer,
-        help="override the configured speech rate in words per minute",
-    )
-    speak_recap_parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="print the final narration without speaking",
-    )
+    _add_speech_arguments(speak_recap_parser)
 
     doctor_parser = subparsers.add_parser(
         "doctor",
@@ -149,6 +186,18 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="path to the selected .lg saved-league directory",
     )
+
+    recap_latest_parser = subparsers.add_parser(
+        "recap-latest",
+        help="speak the newest played game's official recap",
+    )
+    recap_latest_parser.add_argument(
+        "--save-dir",
+        type=Path,
+        required=True,
+        help="path to the selected .lg saved-league directory",
+    )
+    _add_speech_arguments(recap_latest_parser)
 
     return parser
 
@@ -176,7 +225,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_doctor(args.save_dir)
         if args.command == "latest-game":
             return _print_latest_game(args.save_dir)
-    except (GameDetectionError, RecapParseError, SpeechError) as error:
+        if args.command == "recap-latest":
+            return _recap_latest(
+                args.save_dir,
+                voice=args.voice,
+                rate=args.rate,
+                dry_run=args.dry_run,
+            )
+    except (
+        GameDetectionError,
+        RecapParseError,
+        SaveDirectoryError,
+        SpeechError,
+    ) as error:
         print(f"error: {error}", file=sys.stderr)
         return 2
 
