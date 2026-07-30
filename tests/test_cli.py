@@ -4,6 +4,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from ootp_radio.cli import main
+from ootp_radio.models import GameFiles, GameResult
 
 FIXTURE_PATH = (
     Path(__file__).parent / "fixtures" / "game_1596" / "game_box_1596.html"
@@ -122,3 +123,36 @@ def test_watch_stops_cleanly_on_keyboard_interrupt(tmp_path: Path, capsys) -> No
 
     assert result == 0
     assert "watcher_stopped" in capsys.readouterr().err
+
+
+def test_scores_latest_prints_count_and_deterministic_sentences(
+    tmp_path: Path, capsys
+) -> None:
+    save_dir = _create_live_recap_save(tmp_path)
+    game_files = GameFiles(
+        game_id=1596,
+        replay_path=save_dir / "replays" / "replay_1596.rpl",
+        box_score_path=(
+            save_dir / "news" / "html" / "box_scores" / "game_box_1596.html"
+        ),
+        game_log_path=None,
+        highlight_path=None,
+    )
+    results = [
+        GameResult(1, "08/01/2032", "Seattle", 10, "Texas", 3),
+        GameResult(2, "08/01/2032", "Miami", 0, "Philadelphia", 12),
+    ]
+
+    with patch("ootp_radio.cli.detect_latest_game") as detect:
+        with patch("ootp_radio.cli.ensure_game_files_stable"):
+            with patch(
+                "ootp_radio.cli.discover_same_slate_results", return_value=results
+            ):
+                detect.return_value = game_files
+                result = main(["scores-latest", "--save-dir", str(save_dir)])
+
+    output = capsys.readouterr().out
+    assert result == 0
+    assert output.startswith("2 games found")
+    assert "Seattle defeated Texas, 10 to 3." in output
+    assert "Philadelphia defeated Miami, 12 to 0." in output

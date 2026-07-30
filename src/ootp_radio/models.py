@@ -18,6 +18,18 @@ class GameFiles:
 
 
 @dataclass(frozen=True)
+class GameResult:
+    """Final score parsed from an OOTP box score."""
+
+    game_id: int
+    date: str | None
+    away_team: str
+    away_score: int
+    home_team: str
+    home_score: int
+
+
+@dataclass(frozen=True)
 class GameRecap:
     """A cleaned recap extracted from an OOTP game box score."""
 

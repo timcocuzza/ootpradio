@@ -8,6 +8,11 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+from ootp_radio.box_score_parser import (
+    BoxScoreError,
+    discover_same_slate_results,
+    format_score_sentence,
+)
 from ootp_radio.config import load_config
 from ootp_radio.game_detector import (
     GameDetectionError,
@@ -171,6 +176,18 @@ def _watch_latest(
     return 0
 
 
+def _scores_latest(save_dir: Path) -> int:
+    config = load_config(save_dir=save_dir)
+    game_files = detect_latest_game(config.save_dir)
+    ensure_game_files_stable(game_files)
+    results = discover_same_slate_results(game_files)
+
+    print(f"{len(results)} games found")
+    for result in results:
+        print(f"- {format_score_sentence(result)}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the command-line parser."""
     parser = argparse.ArgumentParser(
@@ -271,6 +288,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="override the configured speech rate in words per minute",
     )
 
+    scores_latest_parser = subparsers.add_parser(
+        "scores-latest",
+        help="preview MLB scores from the latest played game's slate",
+    )
+    scores_latest_parser.add_argument(
+        "--save-dir",
+        type=Path,
+        required=True,
+        help="path to the selected .lg saved-league directory",
+    )
+
     return parser
 
 
@@ -313,7 +341,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 voice=args.voice,
                 rate=args.rate,
             )
+        if args.command == "scores-latest":
+            return _scores_latest(args.save_dir)
     except (
+        BoxScoreError,
         GameDetectionError,
         RecapParseError,
         SaveDirectoryError,

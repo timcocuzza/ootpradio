@@ -1,8 +1,8 @@
 # OOTP 27 Radio Companion
 
-This repository currently contains Milestone 6: automatic polling, stable-file
-checks, recap narration, atomic persistent state, and duplicate prevention.
-Watcher state is always stored outside the read-only OOTP save.
+This repository currently contains Milestone 7: the automatic recap watcher
+plus deterministic parsing and printed preview of same-slate MLB scores. Score
+previews are not connected to speech yet.
 
 ## Requirements
 
@@ -27,7 +27,7 @@ pytest -q
 Expected result:
 
 ```text
-50 passed
+60 passed
 ```
 
 ## Preview the narration
@@ -51,26 +51,20 @@ python3 -m ootp_radio.cli recap-latest \
   --dry-run
 ```
 
-## Manual Milestone 6 test
+## Manual Milestone 7 test
 
 With the environment active, run:
 
 ```bash
-python3 -m ootp_radio.cli watch \
+python3 -m ootp_radio.cli scores-latest \
   --save-dir "/Users/timcocuzza/Application Support/Out of the Park Developments/OOTP Baseball 27/saved_games/first os.lg"
 ```
 
-The watcher records the current game as its baseline without speaking it. After
-you complete or simulate one new played game, it should narrate exactly one
-recap beginning with:
+For the current August 3 slate, the command should report `15 games found` and
+print one deterministic sentence per MLB result, including Baltimore's latest
+game. It should not include minor-league games or produce audio.
 
-```text
-This is WBAL News Radio. Your Baltimore Orioles postgame report.
-```
-
-Leave the watcher running briefly to confirm the recap does not repeat, then
-stop it with Control+C. Restarting the same command should not replay the last
-processed game. State is stored atomically at `./var/state.json` by default.
-
-To deliberately narrate the already-current game when starting, add
-`--play-current`.
+Discovery uses the played replay's modification time, includes box scores
+within five seconds, and requires the same MLB game date. IDs do not need to be
+contiguous. All candidate files must remain unchanged across two metadata polls
+before they are parsed.
