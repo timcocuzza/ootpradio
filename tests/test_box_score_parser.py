@@ -83,6 +83,8 @@ def test_parses_game_1596_fixture_result() -> None:
         away_score=7,
         home_team="Detroit Tigers",
         home_score=4,
+        away_team_id=3,
+        home_team_id=10,
     )
 
 

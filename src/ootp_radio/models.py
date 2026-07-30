@@ -27,6 +27,49 @@ class GameResult:
     away_score: int
     home_team: str
     home_score: int
+    away_team_id: int | None = None
+    home_team_id: int | None = None
+
+
+@dataclass(frozen=True)
+class MessageReference:
+    """One cleaned OOTP entity reference from a message."""
+
+    name: str
+    entity_type: str
+    entity_id: str
+
+
+@dataclass(frozen=True)
+class NewsMessage:
+    """A cleaned individual OOTP league message."""
+
+    message_id: int
+    headline: str
+    body: str
+    references: tuple[MessageReference, ...]
+    source_path: Path
+    modified_time_ns: int
+
+
+@dataclass(frozen=True)
+class SelectedNewsMessage:
+    """A message retained by the conservative news filter."""
+
+    message: NewsMessage
+    reasons: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class NewsPreview:
+    """Counts and selected messages from one recent batch."""
+
+    examined_count: int
+    selected: tuple[SelectedNewsMessage, ...]
+
+    @property
+    def filtered_count(self) -> int:
+        return self.examined_count - len(self.selected)
 
 
 @dataclass(frozen=True)

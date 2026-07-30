@@ -1,7 +1,8 @@
 # OOTP 27 Radio Companion
 
-This repository currently contains Milestone 8: the automatic recap watcher
-plus optional narration of same-slate MLB scores after the played-game recap.
+This repository currently contains Milestone 9: the recap and score broadcast
+plus printed parsing and conservative filtering of recent OOTP messages. News
+is not connected to speech yet.
 
 ## Requirements
 
@@ -26,7 +27,7 @@ pytest -q
 Expected result:
 
 ```text
-68 passed
+89 passed
 ```
 
 ## Preview the narration
@@ -50,20 +51,26 @@ python3 -m ootp_radio.cli recap-latest \
   --dry-run
 ```
 
-## Manual Milestone 8 test
+## Manual Milestone 9 test
 
 With the environment active, run:
 
 ```bash
-python3 -m ootp_radio.cli recap-latest \
+python3 -m ootp_radio.cli news-preview \
   --save-dir "/Users/timcocuzza/Application Support/Out of the Park Developments/OOTP Baseball 27/saved_games/first os.lg" \
-  --around-league
+  --team-name "Baltimore Orioles"
 ```
 
-The played Orioles recap should be spoken first. After a short paragraph pause,
-the Mac should say `Now, around the league` and narrate the other 14 MLB games.
-The Orioles result must not be repeated in the score segment. Score sentences
-use articles, such as `The Seattle Mariners defeated the Los Angeles Dodgers`.
+For the current latest-game batch, the command should report `5 recent messages
+examined`, `1 selected`, and `4 filtered out`. The selected headline is `Busch
+Tags Marlins for 5 Hits`; the three minor-league stories and one scouting report
+are filtered out.
 
-Recap-only remains the default. Add `--around-league` to either `recap-latest`
-or `watch` to enable the optional score segment.
+Selected messages include a cleaned headline and the exact selection reason.
+Bodies and entity tags are parsed only to classify whether a story belongs to
+MLB; they are not included in the headline-only output. News remains a printed
+preview and is never spoken in this milestone.
+
+Message batches are associated with the latest replay using a tested 30-second
+modification-time window; the current save writes messages roughly 12 seconds
+after its replay and box-score files.

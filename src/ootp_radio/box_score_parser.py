@@ -18,6 +18,7 @@ _MLB_TITLE = re.compile(
     r"(?P<date>\d{2}/\d{2}/\d{4})"
 )
 _GAME_ID_TEXT = re.compile(r"GAME\s+ID:\s*(\d+)", re.IGNORECASE)
+_TEAM_LINK = re.compile(r"(?:\.\./)?teams/team_(\d+)\.html")
 _TEAM_RECORD = re.compile(r"\s+\(\d+-\d+(?:-\d+)?\)\s*$")
 
 
@@ -157,6 +158,14 @@ def _find_line_score(
     )
 
 
+def _find_team_ids(document: str) -> tuple[int | None, int | None]:
+    """Read the away and home IDs from their first unique team links."""
+    unique_ids = tuple(dict.fromkeys(_TEAM_LINK.findall(document)))
+    if len(unique_ids) < 2:
+        return None, None
+    return int(unique_ids[0]), int(unique_ids[1])
+
+
 def parse_box_score_html(document: str, *, game_id: int) -> GameResult:
     """Parse one final MLB result from OOTP box-score HTML."""
     parser = _BoxScoreHTMLParser()
@@ -176,6 +185,7 @@ def parse_box_score_html(document: str, *, game_id: int) -> GameResult:
         away_team=away_team,
         home_team=home_team,
     )
+    away_team_id, home_team_id = _find_team_ids(document)
     return GameResult(
         game_id=game_id,
         date=game_date,
@@ -183,6 +193,8 @@ def parse_box_score_html(document: str, *, game_id: int) -> GameResult:
         away_score=away_score,
         home_team=home_team,
         home_score=home_score,
+        away_team_id=away_team_id,
+        home_team_id=home_team_id,
     )
 
 

@@ -4,7 +4,13 @@ from pathlib import Path
 from unittest.mock import patch
 
 from ootp_radio.cli import main
-from ootp_radio.models import GameFiles, GameResult
+from ootp_radio.models import (
+    GameFiles,
+    GameResult,
+    NewsMessage,
+    NewsPreview,
+    SelectedNewsMessage,
+)
 
 FIXTURE_PATH = (
     Path(__file__).parent / "fixtures" / "game_1596" / "game_box_1596.html"
@@ -188,3 +194,53 @@ def test_scores_latest_prints_count_and_deterministic_sentences(
     assert output.startswith("2 games found")
     assert "The Seattle defeated the Texas, 10 to 3." in output
     assert "The Philadelphia defeated the Miami, 12 to 0." in output
+
+
+def test_news_preview_prints_counts_reason_and_clean_excerpt(
+    tmp_path: Path, capsys
+) -> None:
+    save_dir = _create_live_recap_save(tmp_path)
+    game_files = GameFiles(
+        1596,
+        save_dir / "replays" / "replay_1596.rpl",
+        save_dir / "news" / "html" / "box_scores" / "game_box_1596.html",
+        None,
+        None,
+    )
+    message = NewsMessage(
+        2201,
+        "Orioles News",
+        "Baltimore Orioles announced a roster move.",
+        (),
+        Path("message2201.txt"),
+        1,
+    )
+    preview = NewsPreview(
+        examined_count=2,
+        selected=(
+            SelectedNewsMessage(message, ("configured team reference",)),
+        ),
+    )
+
+    with patch("ootp_radio.cli.detect_latest_game", return_value=game_files):
+        with patch("ootp_radio.cli.ensure_game_files_stable"):
+            with patch("ootp_radio.cli.build_news_preview", return_value=preview):
+                result = main(
+                    [
+                        "news-preview",
+                        "--save-dir",
+                        str(save_dir),
+                        "--team-name",
+                        "Baltimore Orioles",
+                    ]
+                )
+
+    output = capsys.readouterr().out
+    assert result == 0
+    assert "2 recent messages examined" in output
+    assert "1 selected" in output
+    assert "1 filtered out" in output
+    assert "Selected because: configured team reference" in output
+    assert "Orioles News" in output
+    assert "Baltimore Orioles announced a roster move." not in output
+    assert "Preview:" not in output

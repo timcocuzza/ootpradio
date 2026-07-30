@@ -19,6 +19,7 @@ from ootp_radio.game_detector import (
     ensure_game_files_stable,
 )
 from ootp_radio.live_recap import prepare_latest_recap
+from ootp_radio.message_parser import MessageError, build_news_preview
 from ootp_radio.narration import format_recap_narration, format_score_sentence
 from ootp_radio.paths import SaveDirectoryError, validate_save_dir
 from ootp_radio.recap_parser import RecapParseError, parse_recap_file
@@ -193,6 +194,26 @@ def _scores_latest(save_dir: Path) -> int:
     return 0
 
 
+def _news_preview(save_dir: Path, *, team_name: str) -> int:
+    config = load_config(save_dir=save_dir, team_name=team_name)
+    game_files = detect_latest_game(config.save_dir)
+    ensure_game_files_stable(game_files)
+    preview = build_news_preview(
+        game_files,
+        team_name=config.team_name or team_name,
+    )
+
+    print(f"{preview.examined_count} recent messages examined")
+    print(f"{len(preview.selected)} selected")
+    print(f"{preview.filtered_count} filtered out")
+    for selected in preview.selected:
+        message = selected.message
+        print()
+        print(f"- [{message.message_id}] {message.headline}")
+        print(f"  Selected because: {', '.join(selected.reasons)}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the command-line parser."""
     parser = argparse.ArgumentParser(
@@ -314,6 +335,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="path to the selected .lg saved-league directory",
     )
 
+    news_preview_parser = subparsers.add_parser(
+        "news-preview",
+        help="preview conservatively filtered recent league messages",
+    )
+    news_preview_parser.add_argument(
+        "--save-dir",
+        type=Path,
+        required=True,
+        help="path to the selected .lg saved-league directory",
+    )
+    news_preview_parser.add_argument(
+        "--team-name",
+        required=True,
+        help="controlled organization name used for team-specific filtering",
+    )
+
     return parser
 
 
@@ -360,9 +397,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         if args.command == "scores-latest":
             return _scores_latest(args.save_dir)
+        if args.command == "news-preview":
+            return _news_preview(args.save_dir, team_name=args.team_name)
     except (
         BoxScoreError,
         GameDetectionError,
+        MessageError,
         RecapParseError,
         SaveDirectoryError,
         SpeechError,
