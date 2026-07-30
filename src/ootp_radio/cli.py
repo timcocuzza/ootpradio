@@ -7,7 +7,9 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+from ootp_radio.config import load_config
 from ootp_radio.narration import format_recap_narration
+from ootp_radio.paths import validate_save_dir
 from ootp_radio.recap_parser import RecapParseError, parse_recap_file
 from ootp_radio.speech import MacSaySpeaker, SpeechError
 
@@ -43,6 +45,16 @@ def _positive_integer(value: str) -> int:
     if parsed_value <= 0:
         raise argparse.ArgumentTypeError("must be greater than zero")
     return parsed_value
+
+
+def _run_doctor(save_dir: Path) -> int:
+    config = load_config(save_dir=save_dir)
+    report = validate_save_dir(config.save_dir)
+
+    for check in report.checks:
+        print(check.render())
+
+    return 0 if report.is_healthy else 1
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -87,6 +99,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="print the final narration without speaking",
     )
 
+    doctor_parser = subparsers.add_parser(
+        "doctor",
+        help="validate an OOTP saved-league directory",
+    )
+    doctor_parser.add_argument(
+        "--save-dir",
+        type=Path,
+        required=True,
+        help="path to the selected .lg saved-league directory",
+    )
+
     return parser
 
 
@@ -109,6 +132,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 rate=args.rate,
                 dry_run=args.dry_run,
             )
+        if args.command == "doctor":
+            return _run_doctor(args.save_dir)
     except (RecapParseError, SpeechError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 2

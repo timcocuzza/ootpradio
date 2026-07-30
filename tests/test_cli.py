@@ -22,3 +22,21 @@ def test_speak_recap_dry_run_prints_narration_without_speaking(capsys) -> None:
     )
     assert "DJ Layton" in output
     assert "<a href=" not in output
+
+
+def test_doctor_prints_expected_live_save_checks(tmp_path: Path, capsys) -> None:
+    save_dir = tmp_path / "League With Spaces.lg"
+    (save_dir / "replays").mkdir(parents=True)
+    (save_dir / "news" / "html" / "box_scores").mkdir(parents=True)
+    (save_dir / "news" / "txt" / "leagues").mkdir(parents=True)
+    (save_dir / "messages").mkdir()
+    (save_dir / "news" / "html" / "leagues").mkdir()
+
+    result = main(["doctor", "--save-dir", str(save_dir)])
+
+    output = capsys.readouterr().out
+    assert result == 0
+    assert "PASS: save directory exists" in output
+    assert "PASS: replays directory exists" in output
+    assert "PASS: box_scores directory exists" in output
+    assert "PASS: messages directory exists" in output
