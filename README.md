@@ -1,8 +1,8 @@
 # OOTP 27 Radio Companion
 
-This repository currently contains Milestone 3: deterministic extraction and
-speech for the static game-1596 recap plus read-only validation of a selected
-live `.lg` save directory. It does not detect or speak a live game yet.
+This repository currently contains Milestone 4: static recap parsing and
+speech, read-only save validation, and detection of the latest played game from
+its numeric replay file. It does not speak a live game yet.
 
 ## Requirements
 
@@ -27,7 +27,7 @@ pytest -q
 Expected result:
 
 ```text
-22 passed
+32 passed
 ```
 
 ## Preview the narration
@@ -41,25 +41,27 @@ python3 -m ootp_radio.cli speak-recap tests/fixtures/game_1596/game_box_1596.htm
 The narration begins with WBAL News Radio because the recap mentions the
 Baltimore Orioles. Baltimore is currently the only team-to-station mapping.
 
-## Manual Milestone 3 test
+## Manual Milestone 4 test
 
 With the environment active, run:
 
 ```bash
-python3 -m ootp_radio.cli doctor \
+python3 -m ootp_radio.cli latest-game \
   --save-dir "/Users/timcocuzza/Application Support/Out of the Park Developments/OOTP Baseball 27/saved_games/first os.lg"
 ```
 
-The command should report at least these successful checks:
+For the current save snapshot, the command should report:
 
 ```text
-PASS: save directory exists
-PASS: replays directory exists
-PASS: box_scores directory exists
-PASS: messages directory exists
+Game ID: 1596
+Box score: game_box_1596.html
+Replay: replay_1596.rpl
+Game log: log_1596.txt
+Highlight: highlight_1596.rpl
 ```
 
-Missing required directories are reported as `FAIL` and produce a nonzero exit
-status. Missing optional game-log, message, or league-report directories are
-reported as `WARN` without failing validation. This command only checks path
-structure; live-game detection and narration deliberately remain out of scope.
+Detection is anchored to the newest numeric `replay_<GAME_ID>.rpl`, not the
+newest box score. The replay and required matching box score must retain the
+same size and modification time across two polls before the command reports
+them ready. Game-log and highlight files remain optional. This milestone does
+not parse or speak the detected live game.

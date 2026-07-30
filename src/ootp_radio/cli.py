@@ -8,6 +8,11 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from ootp_radio.config import load_config
+from ootp_radio.game_detector import (
+    GameDetectionError,
+    detect_latest_game,
+    ensure_game_files_stable,
+)
 from ootp_radio.narration import format_recap_narration
 from ootp_radio.paths import validate_save_dir
 from ootp_radio.recap_parser import RecapParseError, parse_recap_file
@@ -55,6 +60,30 @@ def _run_doctor(save_dir: Path) -> int:
         print(check.render())
 
     return 0 if report.is_healthy else 1
+
+
+def _print_latest_game(save_dir: Path) -> int:
+    config = load_config(save_dir=save_dir)
+    game_files = detect_latest_game(config.save_dir)
+    ensure_game_files_stable(game_files)
+
+    game_log = (
+        game_files.game_log_path.name
+        if game_files.game_log_path is not None
+        else "not available"
+    )
+    highlight = (
+        game_files.highlight_path.name
+        if game_files.highlight_path is not None
+        else "not available"
+    )
+
+    print(f"Game ID: {game_files.game_id}")
+    print(f"Box score: {game_files.box_score_path.name}")
+    print(f"Replay: {game_files.replay_path.name}")
+    print(f"Game log: {game_log}")
+    print(f"Highlight: {highlight}")
+    return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -110,6 +139,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="path to the selected .lg saved-league directory",
     )
 
+    latest_game_parser = subparsers.add_parser(
+        "latest-game",
+        help="identify the newest played game and its matching files",
+    )
+    latest_game_parser.add_argument(
+        "--save-dir",
+        type=Path,
+        required=True,
+        help="path to the selected .lg saved-league directory",
+    )
+
     return parser
 
 
@@ -134,7 +174,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         if args.command == "doctor":
             return _run_doctor(args.save_dir)
-    except (RecapParseError, SpeechError) as error:
+        if args.command == "latest-game":
+            return _print_latest_game(args.save_dir)
+    except (GameDetectionError, RecapParseError, SpeechError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 2
 
