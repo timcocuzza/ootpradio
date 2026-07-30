@@ -1,9 +1,9 @@
 # OOTP 27 Radio Companion
 
-This repository currently contains Milestone 12A: a tested, reorderable
-broadcast composer on top of the recap, highlights, MLB scores, and filtered
-news parsers. It is a printed preview foundation for the GUI; the automatic
-watcher has not yet been switched to the new segment pipeline.
+This repository currently contains Milestone 12B: the reorderable broadcast
+composer plus cancellable, latest-wins automatic playback. A stable newer game
+terminates obsolete audio, replaces pending work, and begins only the newest
+broadcast. The GUI and off-day detection are not connected yet.
 
 ## Requirements
 
@@ -28,7 +28,7 @@ pytest -q
 Expected result:
 
 ```text
-112 passed
+127 passed
 ```
 
 ## Preview the narration
@@ -52,27 +52,29 @@ python3 -m ootp_radio.cli recap-latest \
   --dry-run
 ```
 
-## Manual Milestone 12A test
+## Manual Milestone 12B test
 
 With the environment active, run:
 
 ```bash
-python3 -m ootp_radio.cli broadcast-preview \
+python3 -m ootp_radio.cli watch-broadcast \
   --save-dir "/Users/timcocuzza/Application Support/Out of the Park Developments/OOTP Baseball 27/saved_games/first os.lg" \
   --team-name "Baltimore Orioles" \
-  --segment news \
   --segment highlights \
   --segment team-recap \
-  --segment scores
+  --segment scores \
+  --segment news \
+  --play-current
 ```
 
-The requested order deliberately puts News first. The effective order must move
-it to the end while preserving the relative order of Highlights, Team Recap,
-and Scores. The Highlights section must begin directly with OOTP action and
-contain no WBAL introduction. WBAL appears only when the Team Recap section is
-reached. The News section prints selected headlines only, never message bodies.
+The current game begins immediately with Highlights. While it is speaking,
+complete or simulate another game. As soon as the newer replay and box score
+are stable, the old `say` process must stop and only the newest game may begin;
+intermediate pending games are replaced rather than queued. Press `Control-C`
+to stop listening and terminate active audio.
 
-Optional segments with no content are reported as `Skipped` without removing
-ready sections. Composition is lazy: the future player can begin an earlier
-segment before the delayed News parser is invoked. No speech or automatic
-watcher behavior changes in this milestone.
+The monitor rejects partially written replacements, never replays the same game,
+and continues listening after a manual playback stop. News remains lazily
+prepared last, so it cannot delay earlier selected segments. The production
+speaker uses `subprocess.Popen` without a shell and distinguishes deliberate
+cancellation from a genuine text-to-speech failure.

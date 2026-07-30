@@ -415,3 +415,39 @@ def test_broadcast_preview_prints_effective_order_sections_and_omissions(
     assert output.index("[highlights]") < output.index("[team-recap]")
     assert "The pitch...\n\nThe runner scores." in output
     assert "Skipped [news]" in output
+
+
+def test_watch_broadcast_builds_latest_wins_controller_and_stops_cleanly(
+    tmp_path: Path, capsys
+) -> None:
+    save_dir = _create_live_recap_save(tmp_path)
+
+    with patch("ootp_radio.cli.build_latest_wins_controller") as build:
+        build.return_value.run.side_effect = KeyboardInterrupt
+        result = main(
+            [
+                "watch-broadcast",
+                "--save-dir",
+                str(save_dir),
+                "--team-name",
+                "Baltimore Orioles",
+                "--segment",
+                "news",
+                "--segment",
+                "highlights",
+                "--play-current",
+            ]
+        )
+
+    assert result == 0
+    build.assert_called_once_with(
+        save_dir=save_dir,
+        team_name="Baltimore Orioles",
+        segments=(BroadcastSegment.NEWS, BroadcastSegment.HIGHLIGHTS),
+        voice=None,
+        rate=None,
+        poll_interval_seconds=2.0,
+        play_current=True,
+    )
+    build.return_value.stop_listening.assert_called_once()
+    assert "broadcast_watcher_stopped" in capsys.readouterr().err
