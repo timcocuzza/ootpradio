@@ -354,3 +354,23 @@ def test_not_ready_team_event_does_not_interrupt_current_audio() -> None:
     assert controller.play_pending_once() is True
     assert speaker.stop_calls == 0
     assert speaker.spoken == ["off day 08/04/2032"]
+
+
+def test_disabled_off_day_audio_is_recognized_but_safely_silent() -> None:
+    speaker = FakeSpeaker()
+    off_day = OffDayEvent(_slate("08/04/2032", 50))
+    controller = LatestWinsBroadcastController(
+        save_dir=Path("League.lg"),
+        team_name="Baltimore Orioles",
+        segments=(BroadcastSegment.SCORES,),
+        speaker=speaker,
+        play_current=True,
+        event_detector=lambda: off_day,
+        include_off_days=False,
+    )
+
+    controller.initialize()
+
+    assert controller.recognized_event_key == "off-day:08/04/2032"
+    assert controller.play_pending_once() is True
+    assert speaker.spoken == []

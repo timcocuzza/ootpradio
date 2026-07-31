@@ -386,6 +386,13 @@ def _watch_broadcast(
     return 0
 
 
+def _launch_gui() -> int:
+    """Import Tk only when the desktop command is explicitly requested."""
+    from ootp_radio.gui import main as gui_main
+
+    return gui_main()
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the command-line parser."""
     parser = argparse.ArgumentParser(
@@ -393,6 +400,11 @@ def build_parser() -> argparse.ArgumentParser:
         description="Read-only radio companion for Out of the Park Baseball.",
     )
     subparsers = parser.add_subparsers(dest="command")
+
+    subparsers.add_parser(
+        "gui",
+        help="open the native OOTP Radio desktop controls",
+    )
 
     parse_recap_parser = subparsers.add_parser(
         "parse-recap",
@@ -689,6 +701,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 voice=args.voice,
                 rate=args.rate,
             )
+        if args.command == "gui":
+            return _launch_gui()
     except (
         BoxScoreError,
         BroadcastError,

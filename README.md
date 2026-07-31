@@ -1,13 +1,15 @@
 # OOTP 27 Radio Companion
 
-This repository currently contains Milestone 12C: reorderable, cancellable,
-latest-wins playback for both controlled-team games and off days. A stable
+This repository currently contains Milestone 12D: a native macOS GUI over the
+reorderable, cancellable, latest-wins game/off-day broadcast engine. A stable
 newer day terminates obsolete audio, replaces pending work, and begins only the
-newest broadcast. The GUI is the next milestone.
+newest broadcast.
 
 ## Requirements
 
 - Python 3.11 or newer
+- Tk support matching the selected Python version
+- macOS `say` for speech playback
 
 ## Setup
 
@@ -19,6 +21,13 @@ source .venv/bin/activate
 python3 -m pip install -e '.[dev]'
 ```
 
+If Homebrew Python reports `No module named '_tkinter'`, install its matching
+Tk package. This workspace uses Python 3.13:
+
+```bash
+brew install python-tk@3.13
+```
+
 Run the automated smoke test:
 
 ```bash
@@ -28,8 +37,24 @@ pytest -q
 Expected result:
 
 ```text
-147 passed
+169 passed
 ```
+
+## Open the desktop app
+
+```bash
+python3 -m ootp_radio.cli gui
+```
+
+The window provides the save folder, controlled team, macOS voice and optional
+speech rate, enabled broadcast options, drag ordering, off-day behavior, and
+the file-check interval. `macOS System Default` passes no voice override to
+`say`, so playback uses the user's configured Mac voice.
+
+`Start Listening` validates the selected `.lg` folder and saves settings to
+`~/Library/Application Support/OOTP Radio/settings.json`, never inside the
+OOTP save. `Stop Playback` ends only current speech. `Stop Listening` ends both
+speech and file monitoring.
 
 ## Preview the narration
 
@@ -73,7 +98,23 @@ Scores, and qualifying new headlines remain last. If the slate contains
 Baltimore but its replay is still being written, classification waits rather
 than leaking Baltimore's final score as an apparent off day.
 
-## Manual Milestone 12C test
+## Manual Milestone 12D test
+
+Launch the desktop app:
+
+```bash
+python3 -m ootp_radio.cli gui
+```
+
+Choose the live `.lg` save, leave the voice on `macOS System Default`, enable
+`Play current day when starting`, and drag Highlights above Team Radio. Press
+`Start Listening`. The controls lock and the status changes to Listening while
+the current game begins with OOTP play-by-play. `Stop Playback` must end speech
+without changing the Listening status. `Stop Listening` must end the monitor,
+return the status to Stopped, and unlock configuration. Relaunching the app
+must restore the saved folder, order, toggles, voice, and rate.
+
+## Command-line listener
 
 With the environment active, run:
 
@@ -112,5 +153,11 @@ distinguishes deliberate cancellation from a genuine text-to-speech failure.
   always pinned last.
 - `broadcast_controller.py` owns the single latest-wins playback slot and
   interrupts obsolete macOS speech.
+- `app_settings.py` validates and atomically persists GUI configuration and
+  provides the pure drag/toggle ordering rules.
+- `listening_session.py` runs the blocking listener off Tk's event thread and
+  implements Start, Stop Playback, and Stop Listening as a tested state machine.
+- `gui.py` renders the native Tk window and maps its controls onto settings and
+  the listening session.
 - `speech.py` controls the macOS `say` process without changing OOTP files.
-- `cli.py` exposes previews and the watcher while the GUI is being built.
+- `cli.py` exposes the desktop app, previews, and command-line watcher.

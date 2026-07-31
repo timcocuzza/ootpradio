@@ -75,6 +75,7 @@ class LatestWinsBroadcastController:
             [GameFiles], Iterable[BroadcastPart]
         ] | None = None,
         event_detector: Callable[[], RadioEvent] | None = None,
+        include_off_days: bool = True,
     ) -> None:
         if poll_interval_seconds <= 0:
             raise ValueError("poll_interval_seconds must be greater than zero")
@@ -92,6 +93,7 @@ class LatestWinsBroadcastController:
         self._custom_part_factory = part_factory
         self.part_factory = part_factory or self._default_part_factory
         self.event_detector = event_detector
+        self.include_off_days = include_off_days
 
         self._condition = threading.Condition()
         self._cancel_playback = threading.Event()
@@ -106,6 +108,8 @@ class LatestWinsBroadcastController:
         self, target: BroadcastTarget
     ) -> Iterable[BroadcastPart]:
         if isinstance(target, OffDayEvent):
+            if not self.include_off_days:
+                return ()
             return iter_off_day_broadcast_parts(
                 target.slate,
                 save_dir=self.save_dir,
@@ -365,6 +369,7 @@ def build_latest_wins_controller(
     rate: int | None = None,
     poll_interval_seconds: float = 2.0,
     play_current: bool = False,
+    include_off_days: bool = True,
 ) -> LatestWinsBroadcastController:
     """Build the production controller with controllable macOS speech."""
     event_detector = LatestRadioEventDetector(
@@ -379,4 +384,5 @@ def build_latest_wins_controller(
         poll_interval_seconds=poll_interval_seconds,
         play_current=play_current,
         event_detector=event_detector.detect,
+        include_off_days=include_off_days,
     )

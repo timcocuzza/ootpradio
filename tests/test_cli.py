@@ -543,3 +543,11 @@ def test_watch_broadcast_builds_latest_wins_controller_and_stops_cleanly(
     )
     build.return_value.stop_listening.assert_called_once()
     assert "broadcast_watcher_stopped" in capsys.readouterr().err
+
+
+def test_gui_command_launches_desktop_entry_point() -> None:
+    with patch("ootp_radio.cli._launch_gui", return_value=0) as launch:
+        result = main(["gui"])
+
+    assert result == 0
+    launch.assert_called_once_with()
