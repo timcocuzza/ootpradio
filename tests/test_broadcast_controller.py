@@ -1,8 +1,12 @@
 """Race-oriented tests for latest-wins monitoring and cancellation."""
 
 from pathlib import Path
+from unittest.mock import patch
 
-from ootp_radio.broadcast_controller import LatestWinsBroadcastController
+from ootp_radio.broadcast_controller import (
+    LatestWinsBroadcastController,
+    build_latest_wins_controller,
+)
 from ootp_radio.game_detector import GameNotReadyError, NoReplayFilesError
 from ootp_radio.models import (
     BroadcastIssue,
@@ -374,3 +378,22 @@ def test_disabled_off_day_audio_is_recognized_but_safely_silent() -> None:
     assert controller.recognized_event_key == "off-day:08/04/2032"
     assert controller.play_pending_once() is True
     assert speaker.spoken == []
+
+
+def test_production_builder_passes_persisted_team_id_to_detector() -> None:
+    with patch(
+        "ootp_radio.broadcast_controller.LatestRadioEventDetector"
+    ) as detector_class:
+        controller = build_latest_wins_controller(
+            save_dir=Path("League.lg"),
+            team_name="Baltimore Orioles",
+            team_id=3,
+            segments=(BroadcastSegment.HIGHLIGHTS,),
+        )
+
+    detector_class.assert_called_once_with(
+        save_dir=Path("League.lg"),
+        team_name="Baltimore Orioles",
+        team_id=3,
+    )
+    assert controller.event_detector is detector_class.return_value.detect

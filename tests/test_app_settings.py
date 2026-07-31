@@ -21,6 +21,7 @@ def test_missing_settings_file_loads_safe_defaults(tmp_path: Path) -> None:
 
     assert settings.save_dir is None
     assert settings.team_name == "Baltimore Orioles"
+    assert settings.team_id is None
     assert settings.voice is None
     assert settings.rate is None
     assert settings.off_day_broadcasts is True
@@ -33,6 +34,7 @@ def test_settings_round_trip_atomically_with_news_last(tmp_path: Path) -> None:
     settings = AppSettings(
         save_dir=Path("/tmp/League With Spaces.lg"),
         team_name="Baltimore Orioles",
+        team_id=3,
         voice="Alex",
         rate=190,
         segments=(
@@ -76,6 +78,8 @@ def test_corrupted_settings_are_reported_instead_of_silently_overwritten(
         ({"segments": ["scores", "scores"]}, "only once"),
         ({"segments": ["future-option"]}, "unknown"),
         ({"rate": 0}, "positive whole number"),
+        ({"team_id": True}, "positive whole number"),
+        ({"team_id": -3}, "positive whole number"),
         ({"off_day_broadcasts": "yes"}, "true or false"),
         ({"version": 99}, "Unsupported settings version"),
     ],

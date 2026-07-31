@@ -101,6 +101,7 @@ class ListeningSession:
             controller = self.controller_factory(
                 save_dir=settings.save_dir,
                 team_name=settings.team_name,
+                team_id=settings.team_id,
                 segments=settings.segments,
                 voice=settings.voice,
                 rate=settings.rate,

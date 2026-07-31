@@ -84,6 +84,7 @@ class AppSettings:
 
     save_dir: Path | None = None
     team_name: str = DEFAULT_TEAM_NAME
+    team_id: int | None = None
     voice: str | None = None
     rate: int | None = None
     segments: tuple[BroadcastSegment, ...] = DEFAULT_SEGMENTS
@@ -96,6 +97,15 @@ class AppSettings:
             object.__setattr__(self, "save_dir", Path(self.save_dir))
         if not self.team_name.strip():
             raise SettingsError("Team name cannot be empty.")
+        if (
+            self.team_id is not None
+            and (
+                isinstance(self.team_id, bool)
+                or not isinstance(self.team_id, int)
+                or self.team_id <= 0
+            )
+        ):
+            raise SettingsError("Team ID must be a positive whole number.")
         if self.voice is not None and not self.voice.strip():
             object.__setattr__(self, "voice", None)
         if self.rate is not None and self.rate <= 0:
@@ -128,6 +138,10 @@ class AppSettings:
         if not isinstance(team_name, str) or not team_name.strip():
             raise SettingsError("team_name must be non-empty text.")
         voice = _optional_string(value.get("voice"), field_name="voice")
+        team_id = _optional_positive_integer(
+            value.get("team_id"),
+            field_name="team_id",
+        )
         rate = _optional_positive_integer(value.get("rate"), field_name="rate")
         segments = _segments_from_json(
             value.get(
@@ -149,6 +163,7 @@ class AppSettings:
         return cls(
             save_dir=Path(save_dir_text).expanduser() if save_dir_text else None,
             team_name=team_name.strip(),
+            team_id=team_id,
             voice=voice,
             rate=rate,
             segments=segments,
@@ -163,6 +178,7 @@ class AppSettings:
             "version": SETTINGS_VERSION,
             "save_dir": str(self.save_dir) if self.save_dir is not None else None,
             "team_name": self.team_name,
+            "team_id": self.team_id,
             "voice": self.voice,
             "rate": self.rate,
             "segments": [segment.value for segment in self.segments],

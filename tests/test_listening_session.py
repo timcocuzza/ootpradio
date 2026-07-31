@@ -74,6 +74,7 @@ def test_start_forwards_every_gui_setting_and_runs_in_background(
 
     settings = AppSettings(
         save_dir=_valid_save(tmp_path),
+        team_id=3,
         voice="Samantha",
         rate=185,
         segments=(BroadcastSegment.SCORES, BroadcastSegment.NEWS),
@@ -90,6 +91,7 @@ def test_start_forwards_every_gui_setting_and_runs_in_background(
     assert received == {
         "save_dir": settings.save_dir,
         "team_name": "Baltimore Orioles",
+        "team_id": 3,
         "segments": settings.segments,
         "voice": "Samantha",
         "rate": 185,

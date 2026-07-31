@@ -1,6 +1,6 @@
 # OOTP 27 Radio Companion
 
-This repository currently contains Milestone 12D: a native macOS GUI over the
+This repository currently contains Milestone 12E: a native macOS GUI over the
 reorderable, cancellable, latest-wins game/off-day broadcast engine. A stable
 newer day terminates obsolete audio, replaces pending work, and begins only the
 newest broadcast.
@@ -37,7 +37,7 @@ pytest -q
 Expected result:
 
 ```text
-169 passed
+178 passed
 ```
 
 ## Open the desktop app
@@ -46,9 +46,11 @@ Expected result:
 python3 -m ootp_radio.cli gui
 ```
 
-The window provides the save folder, controlled team, macOS voice and optional
-speech rate, enabled broadcast options, drag ordering, off-day behavior, and
-the file-check interval. `macOS System Default` passes no voice override to
+The window provides the save folder, discovered controlled-team selector,
+macOS voice and optional speech rate, enabled broadcast options, drag ordering,
+off-day behavior, and the file-check interval. Teams and their stable OOTP IDs
+are read from recent MLB box scores, including prior slates so a team remains
+selectable on its off day. `macOS System Default` passes no voice override to
 `say`, so playback uses the user's configured Mac voice.
 
 `Start Listening` validates the selected `.lg` folder and saves settings to
@@ -98,7 +100,7 @@ Scores, and qualifying new headlines remain last. If the slate contains
 Baltimore but its replay is still being written, classification waits rather
 than leaking Baltimore's final score as an apparent off day.
 
-## Manual Milestone 12D test
+## Manual Milestone 12E test
 
 Launch the desktop app:
 
@@ -106,13 +108,11 @@ Launch the desktop app:
 python3 -m ootp_radio.cli gui
 ```
 
-Choose the live `.lg` save, leave the voice on `macOS System Default`, enable
-`Play current day when starting`, and drag Highlights above Team Radio. Press
-`Start Listening`. The controls lock and the status changes to Listening while
-the current game begins with OOTP play-by-play. `Stop Playback` must end speech
-without changing the Listening status. `Stop Listening` must end the monitor,
-return the status to Stopped, and unlock configuration. Relaunching the app
-must restore the saved folder, order, toggles, voice, and rate.
+Choose the live `.lg` save. The Team menu must populate with 30 MLB teams,
+including `Baltimore Orioles`, and Baltimore should remain selected for the
+current configuration. Press `Start Listening`, then `Stop Listening` and
+relaunch the app. Baltimore and its OOTP team ID must be restored without being
+hardcoded into event detection.
 
 ## Command-line listener
 
@@ -157,6 +157,8 @@ distinguishes deliberate cancellation from a genuine text-to-speech failure.
   provides the pure drag/toggle ordering rules.
 - `listening_session.py` runs the blocking listener off Tk's event thread and
   implements Start, Stop Playback, and Stop Listening as a tested state machine.
+- `team_discovery.py` builds the GUI team selector from recent stable MLB team
+  links while ignoring minor-league and partially written box scores.
 - `gui.py` renders the native Tk window and maps its controls onto settings and
   the listening session.
 - `speech.py` controls the macOS `say` process without changing OOTP files.

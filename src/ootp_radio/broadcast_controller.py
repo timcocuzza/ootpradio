@@ -364,6 +364,7 @@ def build_latest_wins_controller(
     *,
     save_dir: Path | str,
     team_name: str,
+    team_id: int | None = None,
     segments: Sequence[BroadcastSegment],
     voice: str | None = None,
     rate: int | None = None,
@@ -375,6 +376,7 @@ def build_latest_wins_controller(
     event_detector = LatestRadioEventDetector(
         save_dir=save_dir,
         team_name=team_name,
+        team_id=team_id,
     )
     return LatestWinsBroadcastController(
         save_dir=save_dir,

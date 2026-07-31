@@ -22,6 +22,7 @@ from ootp_radio.listening_session import (
 )
 from ootp_radio.models import BroadcastSegment
 from ootp_radio.paths import SaveDirectoryError, require_valid_save_dir
+from ootp_radio.team_discovery import TeamDiscoveryError, discover_mlb_teams
 
 SYSTEM_DEFAULT_VOICE = "macOS System Default"
 SEGMENT_LABELS = {
@@ -71,6 +72,8 @@ class OOTPRadioWindow:
         )
         self._drag_index: int | None = None
         self._closing = False
+        self._teams_save_dir: Path | None = None
+        self._team_ids_by_name: dict[str, int] = {}
         self._settings_warning: str | None = None
         try:
             settings = load_settings(self.settings_path)
@@ -83,6 +86,7 @@ class OOTPRadioWindow:
             value=str(settings.save_dir) if settings.save_dir else ""
         )
         self.team_var = tk.StringVar(value=settings.team_name)
+        self._selected_team_id = settings.team_id
         self.voice_var = tk.StringVar(
             value=settings.voice or SYSTEM_DEFAULT_VOICE
         )
@@ -114,6 +118,13 @@ class OOTPRadioWindow:
         self._render_segment_order()
         self._apply_session_status(SessionStatus.STOPPED, None)
         self.root.protocol("WM_DELETE_WINDOW", self._close)
+        if settings.save_dir is not None:
+            self.root.after(
+                50,
+                self._refresh_teams,
+                settings.save_dir,
+                False,
+            )
         if self._settings_warning:
             self.root.after(100, self._show_settings_warning)
 
@@ -168,16 +179,28 @@ class OOTPRadioWindow:
         ttk.Label(source, text="Team").grid(
             row=1, column=0, sticky="w", padx=(0, 10), pady=4
         )
-        team_combo = ttk.Combobox(
+        self.team_combo = ttk.Combobox(
             source,
             textvariable=self.team_var,
-            values=("Baltimore Orioles",),
+            values=(self.team_var.get(),),
             state="readonly",
         )
-        team_combo.grid(row=1, column=1, columnspan=2, sticky="ew", pady=4)
+        self.team_combo.grid(
+            row=1,
+            column=1,
+            columnspan=2,
+            sticky="ew",
+            pady=4,
+        )
+        self.team_combo.bind("<<ComboboxSelected>>", self._team_selected)
+        ttk.Label(
+            source,
+            text="Teams are discovered read-only from recent MLB box scores.",
+            style="Hint.TLabel",
+        ).grid(row=2, column=1, columnspan=2, sticky="w", pady=(0, 3))
 
         ttk.Label(source, text="Voice").grid(
-            row=2, column=0, sticky="w", padx=(0, 10), pady=4
+            row=3, column=0, sticky="w", padx=(0, 10), pady=4
         )
         voices = list(discover_macos_voices())
         if self.voice_var.get() not in voices:
@@ -188,9 +211,9 @@ class OOTPRadioWindow:
             values=voices,
             state="readonly",
         )
-        voice_combo.grid(row=2, column=1, sticky="ew", pady=4)
+        voice_combo.grid(row=3, column=1, sticky="ew", pady=4)
         rate_frame = ttk.Frame(source)
-        rate_frame.grid(row=2, column=2, sticky="e", padx=(8, 0), pady=4)
+        rate_frame.grid(row=3, column=2, sticky="e", padx=(8, 0), pady=4)
         ttk.Label(rate_frame, text="Rate").grid(row=0, column=0, padx=(0, 5))
         rate_entry = ttk.Entry(rate_frame, width=7, textvariable=self.rate_var)
         rate_entry.grid(row=0, column=1)
@@ -200,10 +223,10 @@ class OOTPRadioWindow:
             text="System Default uses the voice currently configured in macOS. "
             "Leave rate blank for its normal speed.",
             style="Hint.TLabel",
-        ).grid(row=3, column=1, columnspan=2, sticky="w", pady=(0, 3))
+        ).grid(row=4, column=1, columnspan=2, sticky="w", pady=(0, 3))
 
         self._editable_widgets.extend(
-            [save_entry, browse_button, team_combo, voice_combo, rate_entry]
+            [save_entry, browse_button, self.team_combo, voice_combo, rate_entry]
         )
 
         broadcast = ttk.LabelFrame(
@@ -334,6 +357,57 @@ class OOTPRadioWindow:
         )
         if selected:
             self.save_dir_var.set(selected)
+            self._refresh_teams(Path(selected), True)
+
+    def _team_selected(self, _event: tk.Event | None = None) -> None:
+        self._selected_team_id = self._team_ids_by_name.get(self.team_var.get())
+
+    def _refresh_teams(
+        self,
+        save_dir: Path | str,
+        show_errors: bool = True,
+    ) -> None:
+        save_path = Path(save_dir).expanduser()
+        if self._teams_save_dir is not None and self._teams_save_dir != save_path:
+            self._selected_team_id = None
+        try:
+            teams = discover_mlb_teams(save_path)
+        except TeamDiscoveryError as error:
+            self._teams_save_dir = None
+            if show_errors:
+                messagebox.showerror(
+                    "Could not discover MLB teams",
+                    str(error),
+                    parent=self.root,
+                )
+            return
+
+        self._teams_save_dir = save_path
+        self._team_ids_by_name = {team.name: team.team_id for team in teams}
+        names = tuple(team.name for team in teams)
+        self.team_combo.configure(values=names)
+
+        selected_name = None
+        if self._selected_team_id is not None:
+            selected_name = next(
+                (
+                    team.name
+                    for team in teams
+                    if team.team_id == self._selected_team_id
+                ),
+                None,
+            )
+        if selected_name is None and self.team_var.get() in self._team_ids_by_name:
+            selected_name = self.team_var.get()
+        if selected_name is None:
+            self.team_var.set("")
+            self._selected_team_id = None
+            self.status_detail_var.set(
+                "Choose the controlled MLB team for this save."
+            )
+            return
+        self.team_var.set(selected_name)
+        self._selected_team_id = self._team_ids_by_name[selected_name]
 
     def _toggle_segment(self, segment: BroadcastSegment) -> None:
         try:
@@ -406,6 +480,7 @@ class OOTPRadioWindow:
         return AppSettings(
             save_dir=Path(save_text).expanduser() if save_text else None,
             team_name=self.team_var.get(),
+            team_id=self._selected_team_id,
             voice=(
                 None
                 if voice_text in {"", SYSTEM_DEFAULT_VOICE}
@@ -424,6 +499,9 @@ class OOTPRadioWindow:
             if settings.save_dir is None:
                 raise SettingsError("Choose an OOTP saved-game folder first.")
             require_valid_save_dir(settings.save_dir)
+            if self._teams_save_dir != settings.save_dir:
+                self._refresh_teams(settings.save_dir, True)
+                settings = self._settings_from_form()
             save_settings(settings, self.settings_path)
             self.session.start(settings)
         except (SettingsError, SaveDirectoryError, OSError, RuntimeError) as error:

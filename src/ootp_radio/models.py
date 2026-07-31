@@ -42,6 +42,14 @@ class GameResult:
 
 
 @dataclass(frozen=True)
+class TeamOption:
+    """One selectable MLB organization discovered from OOTP box scores."""
+
+    team_id: int
+    name: str
+
+
+@dataclass(frozen=True)
 class LeagueSlate:
     """One stable batch of MLB final scores written for an OOTP date."""
 
