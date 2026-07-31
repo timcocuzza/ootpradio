@@ -1,6 +1,6 @@
 # OOTP 27 Radio Companion
 
-This repository currently contains Milestone 12E: a native macOS GUI over the
+This repository currently contains Milestone 12F: a packaged native macOS GUI over the
 reorderable, cancellable, latest-wins game/off-day broadcast engine. A stable
 newer day terminates obsolete audio, replaces pending work, and begins only the
 newest broadcast.
@@ -37,10 +37,12 @@ pytest -q
 Expected result:
 
 ```text
-178 passed
+183 passed
 ```
 
 ## Open the desktop app
+
+From the development environment:
 
 ```bash
 python3 -m ootp_radio.cli gui
@@ -57,6 +59,29 @@ selectable on its off day. `macOS System Default` passes no voice override to
 `~/Library/Application Support/OOTP Radio/settings.json`, never inside the
 OOTP save. `Stop Playback` ends only current speech. `Stop Listening` ends both
 speech and file monitoring.
+
+## Build the standalone macOS app
+
+Install the bounded packaging dependency, then run the checked build script:
+
+```bash
+python3 -m pip install -e '.[dev,package]'
+python3 scripts/build_macos_app.py
+```
+
+The script creates and verifies `dist/OOTP Radio.app`. The bundle contains the
+Python and Tk runtimes, so opening it does not require Terminal, virtual
+environment activation, or a separate Python installation:
+
+```bash
+open "dist/OOTP Radio.app"
+```
+
+This first package targets Apple Silicon (`arm64`) and uses macOS ad-hoc code
+signing for local use. It does not yet have a custom icon, Developer ID
+signature, or Apple notarization for distribution to other Macs. Build output
+stays ignored by Git and can always be regenerated from the committed spec and
+script.
 
 ## Preview the narration
 
@@ -100,19 +125,19 @@ Scores, and qualifying new headlines remain last. If the slate contains
 Baltimore but its replay is still being written, classification waits rather
 than leaking Baltimore's final score as an apparent off day.
 
-## Manual Milestone 12E test
+## Manual Milestone 12F test
 
-Launch the desktop app:
+Launch the packaged desktop app without activating the virtual environment:
 
 ```bash
-python3 -m ootp_radio.cli gui
+deactivate 2>/dev/null || true
+open "dist/OOTP Radio.app"
 ```
 
-Choose the live `.lg` save. The Team menu must populate with 30 MLB teams,
-including `Baltimore Orioles`, and Baltimore should remain selected for the
-current configuration. Press `Start Listening`, then `Stop Listening` and
-relaunch the app. Baltimore and its OOTP team ID must be restored without being
-hardcoded into event detection.
+Expected: OOTP Radio opens as a normal app with the saved folder, Baltimore
+team selection, voice, and segment order restored. Press `Start Listening`,
+then `Stop Listening`; both controls should work exactly as they did when the
+GUI was launched from Python.
 
 ## Command-line listener
 
@@ -163,3 +188,8 @@ distinguishes deliberate cancellation from a genuine text-to-speech failure.
   the listening session.
 - `speech.py` controls the macOS `say` process without changing OOTP files.
 - `cli.py` exposes the desktop app, previews, and command-line watcher.
+- `macos/ootp_radio_app.py` is the small graphical application entry point,
+  while `macos/OOTP Radio.spec` declares the arm64 app-bundle metadata and
+  bundled runtime.
+- `scripts/build_macos_app.py` runs the repeatable PyInstaller build and rejects
+  an incomplete, wrongly identified, non-arm64, or invalidly signed bundle.

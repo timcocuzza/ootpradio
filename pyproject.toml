@@ -12,10 +12,10 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+package = ["pyinstaller>=6.21,<7"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-
